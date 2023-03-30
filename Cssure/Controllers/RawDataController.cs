@@ -5,26 +5,46 @@ using System.Net;
 
 namespace Cssure.Controllers
 {
-    public class RawDataController
+    [Route("api/[controller]")]
+    public class RawDataController : ControllerBase
     {
-        [HttpPost]
-        public HttpResponseMessage Post([FromBody] byte[] bytes)
+        private readonly IRawDataService rawDataService;
+        public RawDataController(IRawDataService rawDataServie)
         {
+            this.rawDataService = rawDataServie;
+        }
+
+        [HttpGet]
+        public IActionResult Get()
+        {
+            return Ok(new {message = "Everything ok"});
+        }
+
+        [HttpPost]
+        public ActionResult Post([FromBody] RawData bytes)
+         {
             if(bytes == null)
             {
-                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+                Debug.WriteLine("In RawDataController, failed to receive data");
+
+                return BadRequest(new { message = "Failed to receive data." });
             }
 
-            RawData rawData = new RawData(bytes);
+            //_rawDataService.ProcessData(bytes);
 
-            Debug.WriteLine("In RawDataController, RawData: " + rawData);
 
-            var response = new HttpResponseMessage();
-            response.StatusCode = HttpStatusCode.OK;
-            
-            Debug.WriteLine("In RawDataController, response on HTTP: " + response);
 
-            return response;
+            Debug.WriteLine("In RawDataController, received data");
+
+ 
+            return Ok(new { message = "Data received" });
+        }
+
+        [HttpPost("upload")]
+        public IActionResult Upload([FromBody] byte[] data)
+        {
+            // Handle the byte[] here
+            return Ok();
         }
     }
 }
