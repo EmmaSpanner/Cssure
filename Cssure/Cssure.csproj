@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="IronPython" Version="3.4.0" />
+    <PackageReference Include="M2Mqtt" Version="4.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
