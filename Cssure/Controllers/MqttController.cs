@@ -13,7 +13,8 @@ namespace Cssure.Controllers
 
         ////private static readonly MqttClient client = new MqttClient("broker.hivemq.com");
         //private static readonly MqttClient client = new MqttClient("192.168.0.128");
-        private static readonly MqttClient client = new MqttClient("192.168.77.212");
+        //private static readonly MqttClient client = new MqttClient("192.168.77.212");
+        private static readonly MqttClient client = new MqttClient("localhost");
 
         private readonly string topic_Data;
         public string Topic_Data => topic_Data;
@@ -40,6 +41,7 @@ namespace Cssure.Controllers
                 Client.MqttMsgSubscribed += Client_MqttMsgSubscribed;
                 Client.Connect(Guid.NewGuid().ToString());
                 Client.Subscribe(new string[] { Topic_Reply }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
+               
                 Client.Publish(Topic_Data, System.Text.Encoding.UTF8.GetBytes("Conncetion started From C#"), MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, false);
 
                 return Ok(new { message = "Det sku godt" });
@@ -81,7 +83,7 @@ namespace Cssure.Controllers
             string times = time.ToString();
             Client.Publish(Topic_Data, System.Text.Encoding.UTF8.GetBytes("Test From C# at: "+ times), MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, false);
 
-
+                
             return new List<string>();
 
         }
