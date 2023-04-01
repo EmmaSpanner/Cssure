@@ -10,8 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IMQTTManager,MQTTManager > ();
-//builder.Services.AddScoped<IMQTTManager, MQTTManager>();
+builder.Services.AddSingleton<IMQTTManager,MQTTManager>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -28,13 +27,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-
-
-//using (var scope = app.Services.CreateScope())
-//{
-//    var sampleService = scope.ServiceProvider.GetRequiredService<IMQTTManager>();
-//    sampleService.StartMQTTService();
-//}
 
 using (var serviceScope = app.Services.CreateScope())
 {
