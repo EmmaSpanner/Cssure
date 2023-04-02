@@ -20,7 +20,7 @@ namespace Cssure.Controllers
         [HttpPost]
         public async Task<ActionResult> Post()
          {
-
+            //Reads from stream and copies to byte[]
             using (var stream = new MemoryStream())
             {
                 await Request.Body.CopyToAsync(stream);
@@ -31,19 +31,10 @@ namespace Cssure.Controllers
                     Debug.WriteLine("In RawDataController, failed to receive data");
 
                     return BadRequest(new { msg = "Failed to receive data." }); // Sends a JSON object
-                    //return BadRequest("Failed to receive data.");
                 }
-                ////If the received data is null it returns bad request (Code 400) to patient app
-                //if (bytes == null)
-                //{
-                //    Debug.WriteLine("In RawDataController, failed to receive data");
-
-                //    return BadRequest(new { message = "Failed to receive data." });
-                //}
 
                 //RawData is send to backend for decoding and processing
                 await Task.Run(() => rawDataService.ProcessData(bytes));
-
 
 
                 Debug.WriteLine("In RawDataController, received data");
