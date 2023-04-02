@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Net;
+using System.Text.Json;
 
 namespace Cssure.Controllers
 {
@@ -14,37 +15,28 @@ namespace Cssure.Controllers
             this.rawDataService = rawDataServie;
         }
 
-        [HttpGet]
-        public IActionResult Get()
-        {
-            return Ok(new {message = "Everything ok"});
-        }
-
+        //Post method used to receive RawData from Patient app
         [HttpPost]
-        public ActionResult Post([FromBody] RawData bytes)
+        public async Task<ActionResult> Post(RawData bytes)
          {
-            if(bytes == null)
+
+            //If the received data is null it returns bad request (Code 400) to patient app
+            if (bytes == null)
             {
                 Debug.WriteLine("In RawDataController, failed to receive data");
 
                 return BadRequest(new { message = "Failed to receive data." });
             }
 
-            //_rawDataService.ProcessData(bytes);
+            //RawData is send to backend for decoding and processing
+            //_rawDataService.(bytes);
 
 
 
             Debug.WriteLine("In RawDataController, received data");
 
- 
+            //If data is received succesfully the method returns an OK (Code 200) to patient App
             return Ok(new { message = "Data received" });
-        }
-
-        [HttpPost("upload")]
-        public IActionResult Upload([FromBody] byte[] data)
-        {
-            // Handle the byte[] here
-            return Ok();
         }
     }
 }
