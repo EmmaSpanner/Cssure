@@ -17,7 +17,7 @@ namespace Cssure.Controllers
 
         //Post method used to receive RawData from Patient app
         [HttpPost]
-        public async Task<ActionResult> Post(RawData bytes)
+        public async Task<ActionResult> Post([FromBody] RawData bytes)
          {
 
             //If the received data is null it returns bad request (Code 400) to patient app
