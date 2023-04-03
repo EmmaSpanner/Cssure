@@ -114,7 +114,7 @@ namespace Cssure.ServiceMqtt
         {
             var message = System.Text.Encoding.UTF8.GetString(e.Message);
             var topic = e.Topic; 
-            Debug.WriteLine($"Message received from {topic}: " + message);
+            Debug.WriteLine($"Message received from <<{topic}>>: " + message);
         }
 
 
