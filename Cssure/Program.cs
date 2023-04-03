@@ -33,7 +33,7 @@ using (var serviceScope = app.Services.CreateScope())
     var services = serviceScope.ServiceProvider;
 
     var myDependency = services.GetRequiredService<IMQTTManager>();
-    myDependency.StartMQTTService();
+    myDependency.OpenConncetion();
 }
 
 app.Run();

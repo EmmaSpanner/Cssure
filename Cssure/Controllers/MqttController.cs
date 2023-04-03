@@ -21,10 +21,11 @@ namespace Cssure.Controllers
         [HttpGet("/Senddata")]
         public IActionResult Get(string text)
         {
-            bool succes = _MQTTManager.SendMQTTData(text);
+            bool succes = _MQTTManager.Publish_RawData(text);
 
             if (succes)
             {
+                _MQTTManager.CloseConncetion();
                 return Ok(new { message = "Det sku godt"}); //
             }
             else return BadRequest(new {message= "MQTT er ikke connected"});

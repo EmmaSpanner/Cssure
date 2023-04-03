@@ -2,14 +2,16 @@
 using System.Diagnostics;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
+using static IronPython.Modules._ast;
 
 namespace Cssure.ServiceMqtt
 {
 
     public interface IMQTTManager
     {
-        void StartMQTTService();
-        bool SendMQTTData(string message);
+        void OpenConncetion();
+        void CloseConncetion();
+        bool Publish_RawData(string message);
     }
 
     public class MQTTManager: IMQTTManager
@@ -22,28 +24,39 @@ namespace Cssure.ServiceMqtt
         private readonly MqttClient client;
         public MqttClient Client => client;
 
-
-        private const string Topic_Data     = "ECG/Data/raw";
-        private const string Topic_Reply    = "ECG/Data/RR";
-        private const string Topic_Status_C = "ECG/Status/C";
-        private const string Topic_Status_Py= "ECG/Status/Py";
-
-
-        const byte QOS = MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE;
+        const byte QOS = MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE; //Defalut = QoS1
         private readonly string clientId;
+
+
+        #region Topics
+        private const string Topic_Status_ASPNet = "ECG/Status/ASP.Net";
+        private const string Topic_Status_Python = "ECG/Status/Python";
+
+        private const string Topic_Series_Raw = "ECG/Series/Raw";
+        private const string Topic_Series_Filtred = "ECG/Series/Filtred";
+
+        private const string Topic_Result = "ECG/Result/#";
+        private const string Topic_Result_CSI = "ECG/Result/CSI";
+        private const string Topic_Result_ModCSI = "ECG/Result/ModCSI";
+        private const string Topic_Reuslt_RR = "ECG/Result/RR-tak";
+        #endregion
+
 
         public MQTTManager()
         {
             client = new MqttClient("localhost");
-            clientId = Guid.NewGuid().ToString();
+            clientId = Guid.NewGuid().ToString(); //Nyt unikt ClientID
         }
 
-        public void StartMQTTService()
+        /// <summary>
+        /// Start MQTT service og conncet med LastWill 
+        /// </summary>
+        public void OpenConncetion()
         {
             if (!Client.IsConnected)
             {
-                Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
-                Client.MqttMsgSubscribed += Client_MqttMsgSubscribed;
+                Client.MqttMsgPublishReceived += NewMQTTMessageReceived; //Alle modtaget beskeder havner her
+                Client.MqttMsgSubscribed += NewMQTTSubscriptionEstablished; //Repons på alle subscribtion ender her
 
                 Client.Connect(
                     clientId: clientId,
@@ -52,21 +65,32 @@ namespace Cssure.ServiceMqtt
                     cleanSession: false,
                     keepAlivePeriod:60,
                     willFlag: true,
-                    willTopic: Topic_Status_C,
+                    willTopic: Topic_Status_ASPNet,
                     willMessage: "Offine",
                     willRetain: true,
-                    willQosLevel: 1
+                    willQosLevel: QOS
                     );
-                Client.Publish(Topic_Status_C, System.Text.Encoding.UTF8.GetBytes("Online"), QOS, retain: true);
 
-                Client.Subscribe(new string[] { Topic_Reply }, new byte[] { QOS });
+                Client.Publish(Topic_Status_ASPNet, System.Text.Encoding.UTF8.GetBytes("Online"), QOS, retain: true);
 
-                byte[] ConnectionMessage = System.Text.Encoding.UTF8.GetBytes("Conncetion started From C#");
-                Client.Publish(Topic_Data, ConnectionMessage, QOS, false);
+                Client.Subscribe(new string[] { Topic_Status_Python }, new byte[] { QOS });
+                Client.Subscribe(new string[] { Topic_Result }, new byte[] { QOS });
+
             }
         }
 
-        public bool SendMQTTData(string message)
+
+        public void CloseConncetion()
+        {
+            if (Client.IsConnected)
+            {
+                Client.Publish(Topic_Status_ASPNet, System.Text.Encoding.UTF8.GetBytes("Offline"), QOS, retain: true);
+                Client.Disconnect();
+            }
+        }
+
+
+        public bool Publish_RawData(string message)
         {
             var succes = Client.IsConnected;
             if (succes)
@@ -79,22 +103,22 @@ namespace Cssure.ServiceMqtt
                         message 
                         + "\n at" + times);
 
-                Client.Publish(Topic_Data, sendMessages, QOS, false);
+                Client.Publish(Topic_Series_Raw, sendMessages, QOS, false);
                 return succes;
             }
             return false;
                 
         }
 
-        private void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
+        private void NewMQTTMessageReceived(object sender, MqttMsgPublishEventArgs e)
         {
-            var t = System.Text.Encoding.UTF8.GetString(e.Message);
-            Debug.WriteLine("Modtaget");
-            Debug.WriteLine("Message received:" + t);
+            var message = System.Text.Encoding.UTF8.GetString(e.Message);
+            var topic = e.Topic; 
+            Debug.WriteLine($"Message received from {topic}: " + message);
         }
 
 
-        private void Client_MqttMsgSubscribed(object sender, MqttMsgSubscribedEventArgs e)
+        private void NewMQTTSubscriptionEstablished(object sender, MqttMsgSubscribedEventArgs e)
         {
             Debug.WriteLine("Subscribed to topic " + e.MessageId);
         }
