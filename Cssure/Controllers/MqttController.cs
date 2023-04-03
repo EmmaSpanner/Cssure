@@ -19,13 +19,13 @@ namespace Cssure.Controllers
         }
 
         [HttpGet("/Senddata")]
-        public IActionResult Get(string text)
+        public IActionResult Get(int text)
         {
             bool succes = _MQTTManager.Publish_RawData(text);
 
             if (succes)
             {
-                _MQTTManager.CloseConncetion();
+                //_MQTTManager.CloseConncetion();
                 return Ok(new { message = "Det sku godt"}); //
             }
             else return BadRequest(new {message= "MQTT er ikke connected"});

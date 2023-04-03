@@ -11,7 +11,7 @@ namespace Cssure.ServiceMqtt
     {
         void OpenConncetion();
         void CloseConncetion();
-        bool Publish_RawData(string message);
+        bool Publish_RawData(int message);
     }
 
     public class MQTTManager: IMQTTManager
@@ -28,6 +28,7 @@ namespace Cssure.ServiceMqtt
         private readonly string clientId;
 
 
+
         #region Topics
         private const string Topic_Status_ASPNet = "ECG/Status/ASP.Net";
         private const string Topic_Status_Python = "ECG/Status/Python";
@@ -38,7 +39,7 @@ namespace Cssure.ServiceMqtt
         private const string Topic_Result = "ECG/Result/#";
         private const string Topic_Result_CSI = "ECG/Result/CSI";
         private const string Topic_Result_ModCSI = "ECG/Result/ModCSI";
-        private const string Topic_Reuslt_RR = "ECG/Result/RR-tak";
+        private const string Topic_Reuslt_RR = "ECG/Result/RR-Peak";
         #endregion
 
 
@@ -90,7 +91,7 @@ namespace Cssure.ServiceMqtt
         }
 
 
-        public bool Publish_RawData(string message)
+        public bool Publish_RawData(int message)
         {
             var succes = Client.IsConnected;
             if (succes)
@@ -98,10 +99,7 @@ namespace Cssure.ServiceMqtt
                 var time = DateTime.Now;
                 string times = time.ToString();
                 byte[] sendMessages = 
-                    System.Text.Encoding.UTF8.GetBytes(
-                        "Send From C#: \n" + 
-                        message 
-                        + "\n at" + times);
+                    System.Text.Encoding.UTF8.GetBytes(message.ToString());
 
                 Client.Publish(Topic_Series_Raw, sendMessages, QOS, false);
                 return succes;
