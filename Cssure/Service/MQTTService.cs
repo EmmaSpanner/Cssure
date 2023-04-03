@@ -4,17 +4,17 @@ using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using static IronPython.Modules._ast;
 
-namespace Cssure.ServiceMqtt
+namespace Cssure.Service
 {
 
-    public interface IMQTTManager
+    public interface IMQTTService
     {
         void OpenConncetion();
         void CloseConncetion();
         bool Publish_RawData(int message);
     }
 
-    public class MQTTManager: IMQTTManager
+    public class MQTTService: IMQTTService
     {
 
         //private static readonly MqttClient client = new MqttClient("broker.hivemq.com");
@@ -43,7 +43,7 @@ namespace Cssure.ServiceMqtt
         #endregion
 
 
-        public MQTTManager()
+        public MQTTService()
         {
             client = new MqttClient("localhost");
             clientId = Guid.NewGuid().ToString(); //Nyt unikt ClientID
