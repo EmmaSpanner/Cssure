@@ -15,7 +15,7 @@ namespace Cssure.Service
         public void ProcessData(byte[] bytes)
         {
             Console.WriteLine(bytes.Length);
-            mqttService.Publish_RawData(100);
+            mqttService.Publish_RawData(10012);
         }
     }
 }
