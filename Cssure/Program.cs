@@ -1,3 +1,5 @@
+using Cssure;
+using Cssure.Services;
 using Cssure.Service;
 using Microsoft.AspNetCore.Builder;
 
@@ -10,6 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<IMqttService, MqttService>();
 builder.Services.AddScoped<IRawDataService, RawDataService>();
 builder.Services.AddSingleton<IMQTTService,MQTTServiceLocalPython>();
 var app = builder.Build();
