@@ -5,7 +5,6 @@ namespace Cssure.Models
 {
     public class RawData
     {
-
         public string rawData { get; set; }
     }
 }

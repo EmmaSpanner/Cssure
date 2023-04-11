@@ -1,4 +1,5 @@
 using Cssure;
+using Cssure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +10,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<IMqttService, MqttService>();
 builder.Services.AddScoped<IRawDataService, RawDataService>();
+
+
 
 var app = builder.Build();
 
