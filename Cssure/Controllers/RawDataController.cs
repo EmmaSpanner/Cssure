@@ -34,6 +34,7 @@ namespace Cssure.Controllers
                     return BadRequest(new { msg = "Failed to receive data." }); // Sends a JSON object
                 }
 
+                // TODO:  Her starter dataProccessing når data kommer ind i Cssure
                 //RawData is send to backend for decoding and processing
                 await Task.Run(() => rawDataService.ProcessData(bytes));
 

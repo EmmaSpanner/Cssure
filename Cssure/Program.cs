@@ -11,7 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IRawDataService, RawDataService>();
-builder.Services.AddSingleton<IMQTTService,MQTTService>();
+builder.Services.AddSingleton<IMQTTService,MQTTServiceLocalPython>();
 var app = builder.Build();
 
 

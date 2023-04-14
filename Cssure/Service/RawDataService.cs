@@ -14,6 +14,9 @@ namespace Cssure.Service
         }
         public void ProcessData(byte[] bytes)
         {
+
+            // TODO: Decodeing kan være her
+            // Decoded signal
             Console.WriteLine(bytes.Length);
             mqttService.Publish_RawData(10012);
         }

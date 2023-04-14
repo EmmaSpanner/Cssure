@@ -14,7 +14,7 @@ namespace Cssure.Service
         bool Publish_RawData(int message);
     }
 
-    public class MQTTService: IMQTTService
+    public class MQTTServiceLocalPython: IMQTTService
     {
 
         //private static readonly MqttClient client = new MqttClient("broker.hivemq.com");
@@ -43,7 +43,7 @@ namespace Cssure.Service
         #endregion
 
 
-        public MQTTService()
+        public MQTTServiceLocalPython()
         {
             client = new MqttClient("localhost");
             clientId = Guid.NewGuid().ToString(); //Nyt unikt ClientID
@@ -108,13 +108,17 @@ namespace Cssure.Service
                 
         }
 
+        /// <summary>
+        /// Her for vi alle beskeder tilbage
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void NewMQTTMessageReceived(object sender, MqttMsgPublishEventArgs e)
         {
             var message = System.Text.Encoding.UTF8.GetString(e.Message);
             var topic = e.Topic; 
             Debug.WriteLine($"Message received from <<{topic}>>: " + message);
         }
-
 
         private void NewMQTTSubscriptionEstablished(object sender, MqttMsgSubscribedEventArgs e)
         {
