@@ -17,6 +17,8 @@ builder.Services.AddSingleton<IRawDataService, RawDataService>();
 //MqttService is above
 builder.Services.AddSingleton<IMQTTService, MQTTServiceLocalPython>();
 
+
+
 var app = builder.Build();
 
 
