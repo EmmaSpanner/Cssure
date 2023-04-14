@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Cssure.Services
+namespace Cssure.Constants
 {
     public static class Topics
     {

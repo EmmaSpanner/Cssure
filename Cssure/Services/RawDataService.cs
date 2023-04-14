@@ -1,4 +1,5 @@
-﻿using Cssure.Models;
+﻿using Cssure.Constants;
+using Cssure.Models;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Cssure.Services
@@ -7,7 +8,7 @@ namespace Cssure.Services
     {
 
         private readonly IMQTTService mqttService;
-        public RawDataService(IMQTTService MQTTManager)
+        public RawDataService(IPythonMQTTService MQTTManager)
         {
             mqttService = MQTTManager;
         }

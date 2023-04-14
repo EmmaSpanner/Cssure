@@ -1,6 +1,8 @@
 using Cssure;
+using Cssure.Constants;
 using Cssure.Services;
 using Microsoft.AspNetCore.Builder;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,11 +13,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IMQTTService, MqttService>();
+var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";").Last();
+
+builder.Services.AddSingleton <IIpAdresses>(new IpAdresses(url));
+
+builder.Services.AddSingleton<IBssureMQTTService, MqttService>();
 builder.Services.AddSingleton<IRawDataService, RawDataService>();
 //Very important that MQTTServiceLocalPython is below RawDataService and 
 //MqttService is above
-builder.Services.AddSingleton<IMQTTService, MQTTServiceLocalPython>();
+builder.Services.AddSingleton<IPythonMQTTService, MQTTServiceLocalPython>();
 
 
 
@@ -46,8 +52,10 @@ using (var serviceScope = app.Services.CreateScope())
 {
     var services = serviceScope.ServiceProvider;
 
-    var myDependency = services.GetRequiredService<IMQTTService>();
-    myDependency.OpenConncetion();
+    var myDependencyPython = services.GetRequiredService<IPythonMQTTService>();
+    var myDependencyBssure = services.GetRequiredService<IBssureMQTTService>();
+    myDependencyPython.OpenConncetion();
+    myDependencyBssure.OpenConncetion();
 }
 
 app.Run();

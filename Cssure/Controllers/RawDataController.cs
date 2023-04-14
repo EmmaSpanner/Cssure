@@ -11,11 +11,9 @@ namespace Cssure.Controllers
     [Route("api/[controller]")]
     public class RawDataController : ControllerBase
     {
-        private readonly IRawDataService rawDataService;
-        private readonly IMQTTService mqttService;
-        public RawDataController(IRawDataService rawDataService, IMQTTService mqttService)
+        private readonly IBssureMQTTService mqttService;
+        public RawDataController(IBssureMQTTService mqttService)
         {
-            this.rawDataService = rawDataService;
             this.mqttService = mqttService;
         }
 

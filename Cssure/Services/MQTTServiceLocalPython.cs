@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Cssure.Constants;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using uPLibrary.Networking.M2Mqtt;
@@ -7,14 +8,8 @@ using uPLibrary.Networking.M2Mqtt.Messages;
 namespace Cssure.Services
 {
 
-
-
-    public class MQTTServiceLocalPython : IMQTTService
+    public class MQTTServiceLocalPython : IPythonMQTTService
     {
-
-        //private static readonly MqttClient client = new MqttClient("broker.hivemq.com");
-        //private static readonly MqttClient client = new MqttClient("192.168.0.128");
-        //private static readonly MqttClient client = new MqttClient("192.168.77.212");
 
         private readonly MqttClient client;
         public MqttClient Client => client;

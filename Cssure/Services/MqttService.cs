@@ -1,18 +1,25 @@
 ﻿namespace Cssure.Services
 {
+    using Cssure.Constants;
     using System;
     using uPLibrary.Networking.M2Mqtt;
     using uPLibrary.Networking.M2Mqtt.Messages;
 
-    public class MqttService : IMQTTService
+    public class MqttService : IBssureMQTTService
     {
         private readonly MqttClient client;
         private readonly string clientId;
+        private IRawDataService rawDataService;
 
         public MqttClient Client => client;
-        public MqttService() 
+        public MqttService(IIpAdresses ipAdresses, IRawDataService rawDataService)
         {
-            client = new MqttClient("172.20.10.4");
+            this.rawDataService = rawDataService;
+
+            var tempUrl = ipAdresses.getIP();
+            var url = tempUrl.Split("//")[1].Split(":")[0];
+
+            client = new MqttClient(url);
             clientId = Guid.NewGuid().ToString();
         }
 
@@ -56,14 +63,16 @@
         }
 
         //This code runs when a message is received
-        static void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
+        async void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
             int[] bytesAsInts = Array.ConvertAll(e.Message, c => (int)c);
             Console.WriteLine("Message received: " + string.Join(",", bytesAsInts));
+
+            await Task.Run(() => rawDataService.ProcessData(e.Message));
         }
 
         //This code runs when the client has subscribed to a topic
-        static void client_MqttMsqSubsribed(object senser, MqttMsgSubscribedEventArgs e)
+        void client_MqttMsqSubsribed(object senser, MqttMsgSubscribedEventArgs e)
         {
             Console.WriteLine("Subscribed to topic: " + e.MessageId);
         }
