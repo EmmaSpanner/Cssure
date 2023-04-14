@@ -78,7 +78,7 @@ namespace Cssure.Services
             var succes = Client.IsConnected;
             if (succes)
             {
-                 Client.Publish("Mads", message, QOS, false);
+                 Client.Publish(topic, message, QOS, false);
                 return succes;
             }
             return false;
