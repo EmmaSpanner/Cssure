@@ -1,4 +1,5 @@
-using Cssure;
+using Cssure.Service;
+using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IRawDataService, RawDataService>();
-
+builder.Services.AddSingleton<IMQTTService,MQTTServiceLocalPython>();
 var app = builder.Build();
 
 
@@ -31,5 +32,15 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+
+using (var serviceScope = app.Services.CreateScope())
+{
+    var services = serviceScope.ServiceProvider;
+
+    var myDependency = services.GetRequiredService<IMQTTService>();
+    myDependency.OpenConncetion();
+}
 
 app.Run();
