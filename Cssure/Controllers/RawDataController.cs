@@ -1,4 +1,5 @@
-﻿using Cssure.Models;
+﻿using Cssure.Constants;
+using Cssure.Models;
 using Cssure.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -38,7 +39,7 @@ namespace Cssure.Controllers
                 //RawData is send to backend for decoding and processing
                 //await Task.Run(() => rawDataService.ProcessData(bytes));
 
-                mqttService.Publish_RawData("SeizureDetectionSystem", bytes); 
+                mqttService.Publish_RawData(Topics.Topic_Series_TempToBSSURE, bytes); 
                 Debug.WriteLine("In RawDataController, received data");
 
                 //If data is received succesfully the method returns an OK (Code 200) to patient App
