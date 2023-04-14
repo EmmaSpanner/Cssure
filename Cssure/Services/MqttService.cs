@@ -11,7 +11,7 @@
         public MqttClient Client => client;
         public MqttService() 
         {
-            client = new MqttClient("172.20.10.3");
+            client = new MqttClient("172.20.10.4");
             string clientId = Guid.NewGuid().ToString();
             Connect(client, clientId);
         }
@@ -26,8 +26,11 @@
 
                 client.Connect(clientId);
 
-                client.Subscribe(new string[] { "SeizureDetectionSystem" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
-                Publish("SeizureDetectionSystem", System.Text.Encoding.UTF8.GetBytes("Hej fra Cssure"));
+                //client.Subscribe(new string[] { "SeizureDetectionSystem" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
+                //Publish("SeizureDetectionSystem", System.Text.Encoding.UTF8.GetBytes("Hej fra Cssure"));
+
+                client.Subscribe(new string[] { "SeizureDetectionSystemBssure" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
+
             }
         }
 
@@ -50,7 +53,8 @@
         //This code runs when a message is received
         static void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
-            Console.WriteLine("Message received: " + System.Text.Encoding.UTF8.GetString(e.Message));
+            int[] bytesAsInts = Array.ConvertAll(e.Message, c => (int)c);
+            Console.WriteLine("Message received: " + string.Join(",", bytesAsInts));
         }
 
         //This code runs when the client has subscribed to a topic
