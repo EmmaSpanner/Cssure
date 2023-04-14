@@ -12,8 +12,8 @@ namespace Cssure.Controllers
     public class RawDataController : ControllerBase
     {
         private readonly IRawDataService rawDataService;
-        private readonly IMqttService mqttService;
-        public RawDataController(IRawDataService rawDataService, IMqttService mqttService)
+        private readonly IMQTTService mqttService;
+        public RawDataController(IRawDataService rawDataService, IMQTTService mqttService)
         {
             this.rawDataService = rawDataService;
             this.mqttService = mqttService;
@@ -40,7 +40,7 @@ namespace Cssure.Controllers
                 //RawData is send to backend for decoding and processing
                 //await Task.Run(() => rawDataService.ProcessData(bytes));
 
-                mqttService.Publish("SeizureDetectionSystem", bytes); 
+                mqttService.Publish_RawData("SeizureDetectionSystem", bytes); 
                 Debug.WriteLine("In RawDataController, received data");
 
                 //If data is received succesfully the method returns an OK (Code 200) to patient App

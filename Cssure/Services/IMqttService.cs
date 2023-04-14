@@ -1,7 +1,13 @@
-﻿namespace Cssure.Services
+﻿using Newtonsoft.Json.Linq;
+using uPLibrary.Networking.M2Mqtt;
+
+namespace Cssure.Services
 {
-    public interface IMqttService
+    public interface IMQTTService
     {
-        void Publish(string topic, byte[] data);
+        void OpenConncetion();
+        void CloseConncetion();
+        bool Publish_RawData(string topic, byte[] data);
+
     }
 }

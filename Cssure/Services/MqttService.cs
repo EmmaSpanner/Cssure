@@ -4,37 +4,36 @@
     using uPLibrary.Networking.M2Mqtt;
     using uPLibrary.Networking.M2Mqtt.Messages;
 
-    public class MqttService : IMqttService
+    public class MqttService : IMQTTService
     {
         private readonly MqttClient client;
+        private readonly string clientId;
 
         public MqttClient Client => client;
         public MqttService() 
         {
             client = new MqttClient("172.20.10.4");
-            string clientId = Guid.NewGuid().ToString();
-            Connect(client, clientId);
+            clientId = Guid.NewGuid().ToString();
         }
 
-        public void Connect(MqttClient client, string clientId)
+        public void OpenConncetion()
         {
             if(!Client.IsConnected)
             {
-                client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
+                Client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
 
-                client.MqttMsgSubscribed += client_MqttMsqSubsribed;
+                Client.MqttMsgSubscribed += client_MqttMsqSubsribed;
 
-                client.Connect(clientId);
+                Client.Connect(clientId);
 
                 //client.Subscribe(new string[] { "SeizureDetectionSystem" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
                 //Publish("SeizureDetectionSystem", System.Text.Encoding.UTF8.GetBytes("Hej fra Cssure"));
 
-                client.Subscribe(new string[] { "SeizureDetectionSystemBssure" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
-
+                Client.Subscribe(new string[] { "SeizureDetectionSystemBssure" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE }); 
             }
         }
 
-        public void CloseConnection()
+        public void CloseConncetion()
         {
             if(Client.IsConnected)
             {
@@ -42,11 +41,17 @@
             }
         }
 
-        public void Publish(string topic, byte[] data)
+
+        public bool Publish_RawData(string topic, byte[] data)
         {
             if(Client.IsConnected)
             {
                 client.Publish(topic, data, MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, false);
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
@@ -62,5 +67,7 @@
         {
             Console.WriteLine("Subscribed to topic: " + e.MessageId);
         }
+
+
     }
 }

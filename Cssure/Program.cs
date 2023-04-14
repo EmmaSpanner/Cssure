@@ -1,6 +1,5 @@
 using Cssure;
 using Cssure.Services;
-using Cssure.Service;
 using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,9 +11,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IMqttService, MqttService>();
-builder.Services.AddScoped<IRawDataService, RawDataService>();
-builder.Services.AddSingleton<IMQTTService,MQTTServiceLocalPython>();
+builder.Services.AddSingleton<IMQTTService, MqttService>();
+builder.Services.AddSingleton<IRawDataService, RawDataService>();
+//Very important that MQTTServiceLocalPython is below RawDataService and 
+//MqttService is above
+builder.Services.AddSingleton<IMQTTService, MQTTServiceLocalPython>();
+
 var app = builder.Build();
 
 

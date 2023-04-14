@@ -1,8 +1,7 @@
 ﻿using Cssure.Models;
-using Cssure.Service;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace Cssure.Service
+namespace Cssure.Services
 {
     public class RawDataService : IRawDataService
     {
@@ -18,7 +17,7 @@ namespace Cssure.Service
             // TODO: Decodeing kan være her
             // Decoded signal
             Console.WriteLine(bytes.Length);
-            mqttService.Publish_RawData(10012);
+            mqttService.Publish_RawData(Topics.Topic_Series_Raw, bytes);
         }
     }
 }
