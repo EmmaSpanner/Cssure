@@ -12,6 +12,9 @@ namespace Cssure.Constants
             Topic_Status_CSSURE = "ECG/Status/CSSURE",
             Topic_Status_Python = "ECG/Status/Python",
             Topic_Series_Raw = "ECG/Series/Raw",
-            Topic_Series_Filtred = "ECG/Series/Filtred";
+            Topic_Series_Filtred = "ECG/Series/Filtred",
+
+            Topic_Series_FromBSSURE = "ECG/Series/BSSURE",
+            Topic_Series_TempToBSSURE = "ECG/Temp/ToBSSURE";
     }
 }
