@@ -1,6 +1,6 @@
 ﻿using Cssure.Models;
 
-namespace Cssure.Service
+namespace Cssure.Services
 {
     public interface IRawDataService
     {

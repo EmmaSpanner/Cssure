@@ -1,26 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Cssure.Constants;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
-using static IronPython.Modules._ast;
 
-namespace Cssure.Service
+namespace Cssure.Services
 {
 
-    public interface IMQTTService
-    {
-        void OpenConncetion();
-        void CloseConncetion();
-        bool Publish_RawData(int message);
-    }
-
-    public class MQTTServiceLocalPython: IMQTTService
+    public class MQTTServiceLocalPython : IPythonMQTTService
     {
 
-        //private static readonly MqttClient client = new MqttClient("broker.hivemq.com");
-        //private static readonly MqttClient client = new MqttClient("192.168.0.128");
-        //private static readonly MqttClient client = new MqttClient("192.168.77.212");
-       
         private readonly MqttClient client;
         public MqttClient Client => client;
 
@@ -28,19 +18,6 @@ namespace Cssure.Service
         private readonly string clientId;
 
 
-
-        #region Topics
-        private const string Topic_Status_ASPNet = "ECG/Status/ASP.Net";
-        private const string Topic_Status_Python = "ECG/Status/Python";
-
-        private const string Topic_Series_Raw = "ECG/Series/Raw";
-        private const string Topic_Series_Filtred = "ECG/Series/Filtred";
-
-        private const string Topic_Result = "ECG/Result/#";
-        private const string Topic_Result_CSI = "ECG/Result/CSI";
-        private const string Topic_Result_ModCSI = "ECG/Result/ModCSI";
-        private const string Topic_Reuslt_RR = "ECG/Result/RR-Peak";
-        #endregion
 
 
         public MQTTServiceLocalPython()
@@ -64,18 +41,18 @@ namespace Cssure.Service
                     username: "",
                     password: "",
                     cleanSession: false,
-                    keepAlivePeriod:60,
+                    keepAlivePeriod: 60,
                     willFlag: true,
-                    willTopic: Topic_Status_ASPNet,
+                    willTopic: Topics.Topic_Status_CSSURE,
                     willMessage: "Offine",
                     willRetain: true,
                     willQosLevel: QOS
                     );
 
-                Client.Publish(Topic_Status_ASPNet, System.Text.Encoding.UTF8.GetBytes("Online"), QOS, retain: true);
+                Client.Publish(Topics.Topic_Status_CSSURE, System.Text.Encoding.UTF8.GetBytes("Online"), QOS, retain: true);
 
-                Client.Subscribe(new string[] { Topic_Status_Python }, new byte[] { QOS });
-                Client.Subscribe(new string[] { Topic_Result }, new byte[] { QOS });
+                Client.Subscribe(new string[] { Topics.Topic_Status_Python }, new byte[] { QOS });
+                Client.Subscribe(new string[] { Topics.Topic_Result }, new byte[] { QOS });
 
             }
         }
@@ -85,27 +62,22 @@ namespace Cssure.Service
         {
             if (Client.IsConnected)
             {
-                Client.Publish(Topic_Status_ASPNet, System.Text.Encoding.UTF8.GetBytes("Offline"), QOS, retain: true);
+                Client.Publish(Topics.Topic_Status_CSSURE, System.Text.Encoding.UTF8.GetBytes("Offline"), QOS, retain: true);
                 Client.Disconnect();
             }
         }
 
 
-        public bool Publish_RawData(int message)
+        public bool Publish_RawData(string topic, byte[] message)
         {
             var succes = Client.IsConnected;
             if (succes)
             {
-                var time = DateTime.Now;
-                string times = time.ToString();
-                byte[] sendMessages = 
-                    System.Text.Encoding.UTF8.GetBytes(message.ToString());
-
-                Client.Publish(Topic_Series_Raw, sendMessages, QOS, false);
+                 Client.Publish(topic, message, QOS, false);
                 return succes;
             }
             return false;
-                
+
         }
 
         /// <summary>
@@ -116,7 +88,7 @@ namespace Cssure.Service
         private void NewMQTTMessageReceived(object sender, MqttMsgPublishEventArgs e)
         {
             var message = System.Text.Encoding.UTF8.GetString(e.Message);
-            var topic = e.Topic; 
+            var topic = e.Topic;
             Debug.WriteLine($"Message received from <<{topic}>>: " + message);
         }
 

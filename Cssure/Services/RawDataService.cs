@@ -1,14 +1,14 @@
-﻿using Cssure.Models;
-using Cssure.Service;
+﻿using Cssure.Constants;
+using Cssure.Models;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace Cssure.Service
+namespace Cssure.Services
 {
     public class RawDataService : IRawDataService
     {
 
         private readonly IMQTTService mqttService;
-        public RawDataService(IMQTTService MQTTManager)
+        public RawDataService(IPythonMQTTService MQTTManager)
         {
             mqttService = MQTTManager;
         }
@@ -18,7 +18,7 @@ namespace Cssure.Service
             // TODO: Decodeing kan være her
             // Decoded signal
             Console.WriteLine(bytes.Length);
-            mqttService.Publish_RawData(10012);
+            mqttService.Publish_RawData(Topics.Topic_Series_Raw, bytes);
         }
     }
 }

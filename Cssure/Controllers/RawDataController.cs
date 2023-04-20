@@ -1,5 +1,6 @@
-﻿using Cssure.Models;
-using Cssure.Service;
+﻿using Cssure.Constants;
+using Cssure.Models;
+using Cssure.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Net;
@@ -11,10 +12,10 @@ namespace Cssure.Controllers
     [Route("api/[controller]")]
     public class RawDataController : ControllerBase
     {
-        private readonly IRawDataService rawDataService;
-        public RawDataController(IRawDataService rawDataServie)
+        private readonly IBssureMQTTService mqttService;
+        public RawDataController(IBssureMQTTService mqttService)
         {
-            this.rawDataService = rawDataServie;
+            this.mqttService = mqttService;
         }
 
         //Post method used to receive RawData from Patient app
@@ -36,9 +37,9 @@ namespace Cssure.Controllers
 
                 // TODO:  Her starter dataProccessing når data kommer ind i Cssure
                 //RawData is send to backend for decoding and processing
-                await Task.Run(() => rawDataService.ProcessData(bytes));
+                //await Task.Run(() => rawDataService.ProcessData(bytes));
 
-
+                mqttService.Publish_RawData(Topics.Topic_Series_TempToBSSURE, bytes); 
                 Debug.WriteLine("In RawDataController, received data");
 
                 //If data is received succesfully the method returns an OK (Code 200) to patient App
