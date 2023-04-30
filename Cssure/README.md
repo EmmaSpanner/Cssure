@@ -67,6 +67,7 @@ To launch the Python Data Processing
 		3.1 Open the wanted environment.
 		3.2 Install the following packaged: 
 			"conda install -c conda-forge paho-mqtt"
+			"pip install hrv-analysis"
 		Go to step 4.
 	
 	4. Run the DataProcces.py

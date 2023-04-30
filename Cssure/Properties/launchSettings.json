@@ -29,12 +29,12 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "CssureMads": {
+    "CssureMadsMobil": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "https://192.168.0.4:7064;http://192.168.0.4:5266",
+      "applicationUrl": "https://192.168.184.212:7064;http://192.168.184.212:5266",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
