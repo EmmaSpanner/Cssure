@@ -5,6 +5,7 @@ from scipy import signal
 import json
 import matplotlib.pyplot as plt
 import datetime
+import time
 
 """
 Dette dokument skal imiterer CSSURE og derved sende data til DataProcces.py over MQTT.
@@ -17,7 +18,7 @@ Hvor dataet skal komme tilbage på Topic_Series_Filtred mf.
 def on_connect(client, userdata, flags, rc):
     client.subscribe(Topic_Status_Python)
     client.subscribe(Topic_Series_Filtred)
-    client.publish(Topic_Status_ASPNet, "Online", qos=1, retain=True)
+    client.publish(Topic_Status_CSSURE, "Online", qos=0, retain=True)
     print("Connected with result code "+str(rc))
     
 ms = ""
@@ -33,7 +34,7 @@ def on_message(client, userdata, msg):
     
 def on_disconnect(client, userdata, rc):
    
-    client.publish(Topic_Status_ASPNet, "Offline", qos=1, retain=True)
+    client.publish(Topic_Status_CSSURE, "Offline", qos=1, retain=True)
     print("Disconnected with result code "+str(rc))
     
 def on_subscribe(client, userdata, mid, granted_qos):
@@ -42,7 +43,7 @@ def on_subscribe(client, userdata, mid, granted_qos):
     
 
 def getdataAndSend():
-    cwd = "C:/Users/madsn/Documents/BME/TELE/Repos/Project/Cssure/Python"
+    cwd = "C:/Users/madsn/Documents/BME/TELE/Repos/Project/Cssure/Python/DataProvider"
     
         # data = np.loadtxt(cwd+'/ecg_data_1.csv', skiprows=1,
         # delimiter=',')[:,:]
@@ -64,19 +65,20 @@ def getdataAndSend():
     
     queue = list()
     for i in range(0, len(data), 12):
-        queue.append(data[i:i+12])
         # Sleep 0.04 milliseconds
-        # time.sleep(40/1000)
-        meta["Timestamp"] = str(datetime.datetime.now().timestamp())
+        time.sleep(40/1000)
+        
+        queue.append(data[i:i+12])
         
         # Remove first element if queue is longer than 252*3 samples (3 sec)
-        secPrSection = 30
+        secPrSection = 180
         if len(queue) > (250/12)*secPrSection:
             queue.pop(0)
         
         #Sent every 252 samples (1 sec)
         if (i>0 and i%int(252*1) == 0):
             queue2 = np.array(queue).reshape((-1,2))
+            meta["Timestamp"] = str(datetime.datetime.now().timestamp())
             print("batch: "+ str(i)+ "     Samples " + str(len(queue*12)) + " in queue")
             meta["Data"] = queue2.tolist()
             client.publish(Topic_Series_Raw, json.dumps(meta))
@@ -105,7 +107,7 @@ client.on_subscribe = on_subscribe
 
 #region Topics
 Topic_Status = "ECG/Status/#";
-Topic_Status_ASPNet = "ECG/Status/ASP.Net";
+Topic_Status_CSSURE = "ECG/Status/CSSURE";
 Topic_Status_Python = "ECG/Status/Python";
 Topic_Status_Python_Disconnect = "ECG/Status/Python/Disconnect";
 
@@ -119,10 +121,12 @@ Topic_Reuslt_RR = "ECG/Result/RR-Peak";
 #endregion
 
         
-client.will_set(Topic_Status_ASPNet, payload="Offline", qos=2, retain=True)
-client.connect("localhost", 1883, 60)
+client.will_set(Topic_Status_CSSURE, payload="Offline", qos=0, retain=True)
+client.connect(host="localhost", port=1883, keepalive=60)
 
 getdataAndSend()
+
+client.disconnect()
 
 # json_object = json.dumps(param, indent = 4) 
 # client.publish("ECG/test", json_object)

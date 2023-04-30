@@ -41,7 +41,7 @@ import datetime  #pip install datetime
 def on_connect(client, userdata, flags, rc):
     client.subscribe(Topic_Status)
     client.subscribe(Topic_Series_Raw)
-    client.publish(Topic_Status_Python, "Online", qos=1, retain=True)
+    client.publish(Topic_Status_Python, "Online", qos=0, retain=True)
     print("Connected with result code "+str(rc))
 
 # When a message is received, this function is called
@@ -52,7 +52,7 @@ def on_message(client, userdata, msg):
     ms = message.decode("utf-8")
 
     # Switch case for the different topics
-    if msg.topic == Topic_Status_ASPNet: # ASP.Net status
+    if msg.topic == Topic_Status_CSSURE: # ASP.Net status
         print("ASP.Net status: " + str(message.decode("utf-8")))
         """
         Add some logic here to handle if the ASP.Net status gets offline
@@ -68,6 +68,7 @@ def on_message(client, userdata, msg):
             ecgdata = np.array(ecgObject['Data'])
             param = dict()
             param['PatientId'] = ecgObject['PatientID']
+            param['Timestamp'] = ecgObject['Timestamp']
             param['TimeProcess_s'] = 0
             
             # Calculate the parametres from the ecg data
@@ -98,15 +99,14 @@ def on_message(client, userdata, msg):
 
 # When the client disconnects from the broker    
 def on_disconnect(client, userdata, rc):
-    client.publish(Topic_Status_Python, "Offline", qos=1, retain=True)
+    # client.publish(Topic_Status_Python+"/disconnect", "Disconnected", qos=1, retain=True)
     print("Disconnected with result code "+str(rc))
 
 
 # When the client subscribes to a topic
 def on_subscribe(client, userdata, mid, granted_qos):
     print("Subscribed: "+str(mid)+" QOS:"+str(granted_qos))
-    
-    
+
 # Calculate the parametres from the ecg data
 def CalcParametres(data):
 
@@ -189,7 +189,7 @@ client.on_subscribe = on_subscribe
 
 #region Topics
 Topic_Status = "ECG/Status/#";
-Topic_Status_ASPNet = "ECG/Status/ASP.Net";
+Topic_Status_CSSURE = "ECG/Status/CSSURE";
 Topic_Status_Python = "ECG/Status/Python";
 Topic_Status_Python_Disconnect = "ECG/Status/Python/Disconnect";
 
@@ -204,8 +204,8 @@ Topic_Reuslt_RR = "ECG/Result/RR-Peak";
 
 
 # Create the last will message
-client.will_set(Topic_Status_Python, payload="Offline", qos=2, retain=True)
-client.connect("localhost", 1883, 60)
+client.will_set(Topic_Status_Python, payload="Offline", qos=0, retain=True)
+client.connect(host="localhost", port=1883, keepalive=120)
 
 
 # Will run the client forever, unless you interrupt it
