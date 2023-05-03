@@ -62,6 +62,7 @@ def on_message(client, userdata, msg):
         
         try: 
             #Deserialize the json string
+            # Ready for the real data type, but it requires some changes to match the new dataformat
             ecgObject = json.loads(ms)
             
             # Extract the ecg data and the patient id
@@ -193,8 +194,8 @@ Topic_Status_CSSURE = "ECG/Status/CSSURE";
 Topic_Status_Python = "ECG/Status/Python";
 Topic_Status_Python_Disconnect = "ECG/Status/Python/Disconnect";
 
-Topic_Series_Raw = "ECG/Series/Raw";
-Topic_Series_Filtred = "ECG/Series/Filtred";
+Topic_Series_Raw = "ECG/Series/CSSURE2PYTHON";
+Topic_Series_Filtred = "ECG/Series/PYTHON2CSSURE";
 
 Topic_Result = "ECG/Result/#";
 Topic_Result_CSI = "ECG/Result/CSI";

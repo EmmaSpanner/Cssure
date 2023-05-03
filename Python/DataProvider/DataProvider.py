@@ -65,12 +65,12 @@ def getdataAndSend():
     
     queue = list()
     for i in range(0, len(data), 12):
-        # Sleep 0.04 milliseconds
-        time.sleep(40/1000)
+        # Sleep (1/250)*12 = 0.048 seconds
+        time.sleep(0.048)
         
         queue.append(data[i:i+12])
         
-        # Remove first element if queue is longer than 252*3 samples (3 sec)
+        # Remove first element if queue is longer than 3 min ~= (250/12)*180 = 3750 samples
         secPrSection = 180
         if len(queue) > (250/12)*secPrSection:
             queue.pop(0)
@@ -109,7 +109,6 @@ client.on_subscribe = on_subscribe
 Topic_Status = "ECG/Status/#";
 Topic_Status_CSSURE = "ECG/Status/CSSURE";
 Topic_Status_Python = "ECG/Status/Python";
-Topic_Status_Python_Disconnect = "ECG/Status/Python/Disconnect";
 
 Topic_Series_Raw = "ECG/Series/Raw";
 Topic_Series_Filtred = "ECG/Series/Filtred";

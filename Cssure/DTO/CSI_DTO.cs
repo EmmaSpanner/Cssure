@@ -17,5 +17,4 @@
         public float[] rr_intervals_ms { get; set; }
         public float[] filtered_ecg { get; set; }
     }
-
 }

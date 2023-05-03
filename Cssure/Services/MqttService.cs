@@ -1,7 +1,9 @@
 ﻿namespace Cssure.Services
 {
     using Cssure.Constants;
+    using Cssure.DTO;
     using System;
+    using System.Text.Json;
     using uPLibrary.Networking.M2Mqtt;
     using uPLibrary.Networking.M2Mqtt.Messages;
 
@@ -25,7 +27,7 @@
 
         public void OpenConncetion()
         {
-            if(!Client.IsConnected)
+            if (!Client.IsConnected)
             {
                 Client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
 
@@ -36,13 +38,13 @@
                 //client.Subscribe(new string[] { "SeizureDetectionSystem" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
                 //Publish("SeizureDetectionSystem", System.Text.Encoding.UTF8.GetBytes("Hej fra Cssure"));
 
-                Client.Subscribe(new string[] { Topics.Topic_Series_FromBSSURE }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE }); 
+                Client.Subscribe(new string[] { Topics.Topic_Series_FromBSSURE }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
             }
         }
 
         public void CloseConncetion()
         {
-            if(Client.IsConnected)
+            if (Client.IsConnected)
             {
                 Client.Disconnect();
             }
@@ -51,7 +53,7 @@
 
         public bool Publish_RawData(string topic, byte[] data)
         {
-            if(Client.IsConnected)
+            if (Client.IsConnected)
             {
                 client.Publish(topic, data, MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, false);
                 return true;
@@ -65,8 +67,12 @@
         //This code runs when a message is received
         async void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
-            int[] bytesAsInts = Array.ConvertAll(e.Message, c => (int)c);
-            Console.WriteLine("Message received: " + string.Join(",", bytesAsInts));
+            var message = System.Text.Encoding.UTF8.GetString(e.Message);
+            var topic = e.Topic;
+            EKGSampleDTO temp = JsonSerializer.Deserialize<EKGSampleDTO>(message)!;
+            //var serialData = JsonSerializer.Serialize<EKGSampleDTO>(data);
+            //int[] bytesAsInts = Array.ConvertAll(e.Message, c => (int)c);
+            //Console.WriteLine("Message received: " + string.Join(",", bytesAsInts));
 
             await Task.Run(() => rawDataService.ProcessData(e.Message));
         }
