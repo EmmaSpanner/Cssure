@@ -1,4 +1,5 @@
 ﻿using Cssure.Constants;
+using Cssure.DTO;
 using Cssure.Models;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -12,13 +13,18 @@ namespace Cssure.Services
         {
             mqttService = MQTTManager;
         }
-        public void ProcessData(byte[] bytes)
+        public void ProcessData(EKGSampleDTO eKGSample)
         {
 
+            var bytes = eKGSample.rawBytes;
             // TODO: Decodeing kan være her
             // Decoded signal
-            Console.WriteLine(bytes.Length);
-            mqttService.Publish_RawData(Topics.Topic_Series_Raw, bytes);
+            sbyte[] signedBytes = (sbyte[]) (Array)bytes;
+            sbyte[] SignedBytes = Array.ConvertAll(bytes,x => unchecked((sbyte)x));
+
+
+            byte[] ecgdata = DecodingBytes.DecodingByteArray.DecodeBytes(SignedBytes);
+            mqttService.Publish_RawData(Topics.Topic_Series_Raw, ecgdata);
         }
     }
 }

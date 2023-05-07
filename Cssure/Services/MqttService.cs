@@ -80,7 +80,7 @@
                     //int[] bytesAsInts = Array.ConvertAll(e.Message, c => (int)c);
                     //Console.WriteLine("Message received: " + string.Join(",", bytesAsInts));
 
-                    await Task.Run(() => rawDataService.ProcessData(e.Message));
+                    await Task.Run(() => rawDataService.ProcessData(temp));
                 }
 
             }
