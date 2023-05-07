@@ -38,7 +38,7 @@
                 //client.Subscribe(new string[] { "SeizureDetectionSystem" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
                 //Publish("SeizureDetectionSystem", System.Text.Encoding.UTF8.GetBytes("Hej fra Cssure"));
 
-                Client.Subscribe(new string[] { Topics.Topic_Series_FromBSSURE }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
+                Client.Subscribe(new string[] { Topics.Topic_Series_FromBSSURE, Topics.Topic_User }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
             }
         }
 
@@ -67,14 +67,23 @@
         //This code runs when a message is received
         async void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
-            var message = System.Text.Encoding.UTF8.GetString(e.Message);
-            var topic = e.Topic;
-            EKGSampleDTO temp = JsonSerializer.Deserialize<EKGSampleDTO>(message)!;
-            //var serialData = JsonSerializer.Serialize<EKGSampleDTO>(data);
-            //int[] bytesAsInts = Array.ConvertAll(e.Message, c => (int)c);
-            //Console.WriteLine("Message received: " + string.Join(",", bytesAsInts));
 
-            await Task.Run(() => rawDataService.ProcessData(e.Message));
+            if (Client.IsConnected)
+            {
+                if (e.Topic == Topics.Topic_Series_FromBSSURE)
+                {
+
+                    var message = System.Text.Encoding.UTF8.GetString(e.Message);
+                    var topic = e.Topic;
+                    EKGSampleDTO temp = JsonSerializer.Deserialize<EKGSampleDTO>(message)!;
+                    //var serialData = JsonSerializer.Serialize<EKGSampleDTO>(data);
+                    //int[] bytesAsInts = Array.ConvertAll(e.Message, c => (int)c);
+                    //Console.WriteLine("Message received: " + string.Join(",", bytesAsInts));
+
+                    await Task.Run(() => rawDataService.ProcessData(e.Message));
+                }
+
+            }
         }
 
         //This code runs when the client has subscribed to a topic

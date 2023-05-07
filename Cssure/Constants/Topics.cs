@@ -17,6 +17,8 @@ namespace Cssure.Constants
             Topic_Series_Raw = "ECG/Series/CSSURE2PYTHON",
             Topic_Series_Filtred = "ECG/Series/PYTHON2CSSURE",
 
+            Topic_User= "ECG/Userdata/#",
+
             Topic_Series_TempToBSSURE = "ECG/Temp/ToBSSURE";
     }
 }

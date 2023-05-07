@@ -51,7 +51,7 @@ def getdataAndSend():
     data[:,0] = data[:,0]*0
     x_resampled = signal.resample(data[:,1], int(len(data[:,1])/2))
     data = np.c_[np.zeros(len(x_resampled)),x_resampled]
-    data = data[1:10000,:]
+    # data = data[1:10000,:]
     """
     Should send data in batches of varieng length to simulate
     real time data
@@ -59,39 +59,46 @@ def getdataAndSend():
     add them to a fifo queue, with max length of 3000 samples"""
     meta = dict()
     meta["PatientID"] = "1234567890"
-    meta["Timestamp"] = str(datetime.datetime.now().timestamp())
-    meta["SampleRate"] = 250
-    meta["Data"] = []
+    meta["Timestamp"] = []
+    meta["CSINormMax"] = [15.35,15.49,17.31]
+    meta["ModCSINormMax"] = [9074,8485,8719]
+    meta["Ch1"] = []
+    meta["Ch2"] = []
+    meta["Ch3"] = []
     
     queue = list()
+    queueTime = list()
     for i in range(0, len(data), 12):
         # Sleep (1/250)*12 = 0.048 seconds
         time.sleep(0.048)
         
-        queue.append(data[i:i+12])
-        
-        # Remove first element if queue is longer than 3 min ~= (250/12)*180 = 3750 samples
-        secPrSection = 180
-        if len(queue) > (250/12)*secPrSection:
+        queue.append(data[i:i+12,1])
+        queueTime.append(datetime.datetime.now().timestamp())
+        # Remove first element if queue is longer than 3 min ~= (250sample/s*180s)/12 = 3750 batches
+        secPrBatch = 3750
+        if len(queue) > secPrBatch:
             queue.pop(0)
+            queueTime.pop(0)
         
         #Sent every 252 samples (1 sec)
-        if (i>0 and i%int(252*1) == 0):
-            queue2 = np.array(queue).reshape((-1,2))
-            meta["Timestamp"] = str(datetime.datetime.now().timestamp())
-            print("batch: "+ str(i)+ "     Samples " + str(len(queue*12)) + " in queue")
-            meta["Data"] = queue2.tolist()
+        if (i>30*60 and i%int(252*1) == 0):
+            queue2 = np.array(queue).reshape((-1,12))
+            meta["Timestamp"] = queueTime
+            print("batch: "+ str(len(queue))+ "     Samples " + str(len(queue*12)) + " in queue")
+            meta["Ch1"] = queue2.tolist()
+            meta["Ch2"] = queue2.tolist()
+            meta["Ch3"] = queue2.tolist()
             client.publish(Topic_Series_Raw, json.dumps(meta))
 
 
-    queue = list()
-    meta["Timestamp"] = str(datetime.datetime.now().timestamp())
-    data = np.c_[np.zeros(len(x_resampled)),x_resampled]
-    queue= data
-    queue2 = np.array(queue).reshape((-1,2))
-    meta["Data"] = queue2.tolist()
-    print("Sent all data")
-    client.publish(Topic_Series_Raw, json.dumps(meta))
+    # queue = list()
+    # meta["Timestamp"] = str(datetime.datetime.now().timestamp())
+    # data = np.c_[np.zeros(len(x_resampled)),x_resampled]
+    # queue= data
+    # queue2 = np.array(queue).reshape((-1,2))
+    # meta["Data"] = queue2.tolist()
+    # print("Sent all data")
+    # client.publish(Topic_Series_Raw, json.dumps(meta))
 
 
 client = mqtt.Client()
@@ -110,8 +117,9 @@ Topic_Status = "ECG/Status/#";
 Topic_Status_CSSURE = "ECG/Status/CSSURE";
 Topic_Status_Python = "ECG/Status/Python";
 
-Topic_Series_Raw = "ECG/Series/Raw";
-Topic_Series_Filtred = "ECG/Series/Filtred";
+Topic_Series_Raw = "ECG/Series/CSSURE2PYTHON";
+Topic_Series_Filtred = "ECG/Series/PYTHON2CSSURE";
+
 
 Topic_Result = "ECG/Result/#";
 Topic_Result_CSI = "ECG/Result/CSI";
