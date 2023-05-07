@@ -9,6 +9,17 @@
     }
   },
   "profiles": {
+    "CssureLaura": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://192.168.0.5:7064;http://192.168.0.5:5266",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+
     "Cssure": {
       "commandName": "Project",
       "dotnetRunMessages": true,
@@ -19,6 +30,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+
     "CssureEmma": {
       "commandName": "Project",
       "dotnetRunMessages": true,
@@ -29,6 +41,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+
     "CssureMadsMobil": {
       "commandName": "Project",
       "dotnetRunMessages": true,
@@ -37,23 +50,26 @@
       "applicationUrl": "https://192.168.0.4:7064;http://192.168.0.4:5266",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "CssureVVBar": {
-        "commandName": "Project",
-        "dotnetRunMessages": true,
-        "launchBrowser": true,
-        "launchUrl": "swagger",
-        "applicationUrl": "https://192.168.0.4:7064;http://192.168.0.4:5266",
-        "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "IIS Express": {
-          "commandName": "IISExpress",
-          "launchBrowser": true,
-          "launchUrl": "swagger",
-          "environmentVariables": {
-            "ASPNETCORE_ENVIRONMENT": "Development"
-          }
-        }
+      }
+    },
+
+    "CssureVVBar": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://192.168.0.4:7064;http://192.168.0.4:5266",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
+  }
+}

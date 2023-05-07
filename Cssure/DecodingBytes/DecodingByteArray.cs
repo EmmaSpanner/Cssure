@@ -1,4 +1,4 @@
-﻿using Cssure.Models;
+﻿using Cssure.DTO;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
@@ -27,9 +27,9 @@ namespace Cssure.DecodingBytes
         private static int[][] buffer_iECG1 = new int[25][];
         private static int[][] buffer_iECG2 = new int[25][];
         private static int[][] buffer_iECG3 = new int[25][];
-        private static ECGData bufferECG = new ECGData();
+        //private static ECGData bufferECG = new ECGData();
 
-        public static byte[] DecodeBytes(sbyte[] data)
+        public static ECGBatchData DecodeBytes(sbyte[] data)
         {
             int index = 0;
             int C1_compression = 0;
@@ -206,45 +206,52 @@ namespace Cssure.DecodingBytes
             if (firstRunAfterConnection)
                 firstRunAfterConnection = false;
             
-            samplesCounter += nBatchSamples;
+            //samplesCounter += nBatchSamples;
 
             // Add decoded batch to buffer
             // This buffer will be filled with a batch for each new call
-            buffer_iECG1[bufferCounter] = decoded_iECG1;
-            buffer_iECG2[bufferCounter] = decoded_iECG2;
-            buffer_iECG3[bufferCounter] = decoded_iECG3;
-            bufferCounter++;
+            //buffer_iECG1[bufferCounter] = decoded_iECG1;
+            //buffer_iECG2[bufferCounter] = decoded_iECG2;
+            //buffer_iECG3[bufferCounter] = decoded_iECG3;
+            //bufferCounter++;
+
+            ECGBatchData ecgData = new ECGBatchData()
+            {
+                ECGChannel1 = decoded_iECG1,
+                ECGChannel2 = decoded_iECG2,
+                ECGChannel3 = decoded_iECG3,
+            };
 
             // When buffer is full, start removing first in batch and add new batch to end of buffer
-            if (samplesCounter >= nBufferSamples)
-            {
-                // Fill the data model with all batches from buffer
-                bufferECG.ECGChannel1 = ConvertArrayToList(buffer_iECG1);
-                bufferECG.ECGChannel2 = ConvertArrayToList(buffer_iECG2);
-                bufferECG.ECGChannel3 = ConvertArrayToList(buffer_iECG3);
-                bufferECG.Samples = samplesCounter;
+            //if (samplesCounter >= nBufferSamples)
+            //{
+            //    // Fill the data model with all batches from buffer
+            //    bufferECG.ECGChannel1 = ConvertArrayToList(buffer_iECG1);
+            //    bufferECG.ECGChannel2 = ConvertArrayToList(buffer_iECG2);
+            //    bufferECG.ECGChannel3 = ConvertArrayToList(buffer_iECG3);
+            //    bufferECG.Samples = samplesCounter;
 
-                // Serialize ECGData to a UTF-8 encoded byte array
-                byte[] jsonUtf8Bytes = JsonSerializer.SerializeToUtf8Bytes(bufferECG);
+            //    // Serialize ECGData to a UTF-8 encoded byte array
+            //    byte[] jsonUtf8Bytes = JsonSerializer.SerializeToUtf8Bytes(bufferECG);
 
-                ECGData test = JsonSerializer.Deserialize<ECGData>(jsonUtf8Bytes);
+            //    ECGData test = JsonSerializer.Deserialize<ECGData>(jsonUtf8Bytes);
 
-                // Resetting sample counter to create new buffer
-                samplesCounter = 0;
+            //    // Resetting sample counter to create new buffer
+            //    samplesCounter = 0;
 
-                // Removing first in from buffer (FIFO)
-                bufferECG.ECGChannel1.RemoveAt(0);
-                bufferECG.ECGChannel2.RemoveAt(0);
-                bufferECG.ECGChannel3.RemoveAt(0);
+            //    // Removing first in from buffer (FIFO)
+            //    bufferECG.ECGChannel1.RemoveAt(0);
+            //    bufferECG.ECGChannel2.RemoveAt(0);
+            //    bufferECG.ECGChannel3.RemoveAt(0);
 
-                return jsonUtf8Bytes;
-            }
-            else // If buffer is not full, send available data
-            {
+            //    return jsonUtf8Bytes;
+            //}
+            //else // If buffer is not full, send available data
+            //{
 
-            }
+            //}
 
-            return new byte[0];
+            return ecgData;
         }
 
         private static List<List<int>> ConvertArrayToList(int[][] ecgBuffer)
