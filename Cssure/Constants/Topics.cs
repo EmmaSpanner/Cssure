@@ -14,7 +14,7 @@ namespace Cssure.Constants
             Topic_Series_Raw = "ECG/Series/Raw",
             Topic_Series_Filtred = "ECG/Series/Filtred",
 
-            Topic_Series_FromBSSURE = "ECG/Series/BSSURE",
+            Topic_Series_FromBSSURE = "ECG/Series/BSSURE2CSSURE",
             Topic_Series_TempToBSSURE = "ECG/Temp/ToBSSURE";
     }
 }

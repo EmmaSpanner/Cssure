@@ -13,9 +13,12 @@ namespace Cssure.Controllers
     public class RawDataController : ControllerBase
     {
         private readonly IBssureMQTTService mqttService;
-        public RawDataController(IBssureMQTTService mqttService)
+        private readonly IRawDataService rawDataService;
+
+        public RawDataController(IBssureMQTTService mqttService, IRawDataService rawDataService) //TODO: delete everything with IRawDataService when done
         {
             this.mqttService = mqttService;
+            this.rawDataService = rawDataService;
         }
 
         //Post method used to receive RawData from Patient app
@@ -27,7 +30,6 @@ namespace Cssure.Controllers
             {
                 await Request.Body.CopyToAsync(stream);
                 var bytes = stream.ToArray();
-
                 if (bytes == null)
                 {
                     Debug.WriteLine("In RawDataController, failed to receive data");
@@ -37,7 +39,7 @@ namespace Cssure.Controllers
 
                 // TODO:  Her starter dataProccessing når data kommer ind i Cssure
                 //RawData is send to backend for decoding and processing
-                //await Task.Run(() => rawDataService.ProcessData(bytes));
+                await Task.Run(() => rawDataService.ProcessData(bytes));
 
                 mqttService.Publish_RawData(Topics.Topic_Series_TempToBSSURE, bytes); 
                 Debug.WriteLine("In RawDataController, received data");

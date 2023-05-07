@@ -6,7 +6,6 @@ namespace Cssure.Services
 {
     public class RawDataService : IRawDataService
     {
-
         private readonly IMQTTService mqttService;
         public RawDataService(IPythonMQTTService MQTTManager)
         {
@@ -14,11 +13,15 @@ namespace Cssure.Services
         }
         public void ProcessData(byte[] bytes)
         {
-
-            // TODO: Decodeing kan være her
-            // Decoded signal
-            Console.WriteLine(bytes.Length);
-            mqttService.Publish_RawData(Topics.Topic_Series_Raw, bytes);
+            // Converting to signed bytes
+            sbyte[] signedBytes = (sbyte[])(Array)bytes;
+            sbyte[] SignedBytes = Array.ConvertAll(bytes, x => unchecked((sbyte)x));
+            
+            // Decoding bytes to ECGData
+            byte[] ecgData = DecodingBytes.DecodingByteArray.DecodeBytes(SignedBytes);
+            
+            // Publish ECGData to MQTT
+            //mqttService.Publish_RawData(Topics.Topic_Series_Raw, bytes);
         }
     }
 }

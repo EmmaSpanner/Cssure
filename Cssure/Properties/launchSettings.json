@@ -16,7 +16,7 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://172.20.10.4:7064;http://172.20.10.4:5266",
 
-      // "applicationUrl": "https://172.20.10.3:7064;http://172.20.10.3:5266",
+      // "applicationUrl": "https://192.168.0.5:7064;http://192.168.0.5:5266",
 
       //"applicationUrl": "https://localhost:7064;http://localhost:5266",
       //"applicationUrl": "https://192.168.0.128:7064;http://192.168.0.128:5266",
@@ -32,6 +32,16 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "applicationUrl": "https://172.20.10.4:7064;http://172.20.10.4:5266",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "CssureLaura": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://192.168.0.5:7064;http://192.168.0.5:5266",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

@@ -20,9 +20,14 @@ namespace Cssure.Services
 
 
 
-        public MQTTServiceLocalPython()
+        public MQTTServiceLocalPython(IIpAdresses ipAdresses)
         {
-            client = new MqttClient("localhost");
+
+            var tempUrl = ipAdresses.getIP();
+            var url = tempUrl.Split("//")[1].Split(":")[0];
+
+            client = new MqttClient(url);
+            //client.ProtocolVersion = MqttProtocolVersion.Version_3_1;
             clientId = Guid.NewGuid().ToString(); //Nyt unikt ClientID
         }
 
