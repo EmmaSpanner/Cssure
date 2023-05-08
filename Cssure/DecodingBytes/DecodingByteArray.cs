@@ -1,4 +1,4 @@
-﻿using Cssure.DTO;
+﻿using Cssure.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
@@ -40,6 +40,13 @@ namespace Cssure.DecodingBytes
             int nSamples = data[index++]; // Index 3
 
             // Accelerometer data accounts for index 4-7 and will not be used at first
+            //int Acc_X = Convert_16bit_Sign_Value((((data[index] << 4) & 0xFF0) | ((data[index + 1] >> 4) & 0x0F)) << 4);
+            //int Acc_Y = Convert_16bit_Sign_Value((((data[index + 1] & 0x0F) << 8) | (data[index + 2] & 0xFF)) << 4);
+            //int Acc_Z = Convert_16bit_Sign_Value((((data[index + 3] << 4) & 0xFF0) | ((data[index + 4] >> 4) & 0x0F)) << 4)
+            //Acc_X = Acc_X / 16;
+            //Acc_Y = Acc_Y / 16;
+            //Acc_Z = Acc_Z / 16;
+
             index += 4;
 
             int Events = data[index++] & 0x0F; // Index 8
@@ -107,11 +114,7 @@ namespace Cssure.DecodingBytes
             for (int i = nSamples - 1; i >= 0; i--)
             {
                 bitmask = (C1_compression >> (i * 2)) & 0x03;
-                //Tuple<int, int> C1_params = DecodeChannelDifference(bitmask, index, data, C1_diff);
-                //C1_diff = C1_params.Item1; // C1 difference
-                //index = C1_params.Item2; // Index
 
-                #region To be deleted
                 if (bitmask == 2)
                 {
                     tmp_buf = ((data[index] << 16) & 0xFF0000) | ((data[index + 1] << 8) & 0x00FF00) | ((data[index + 2]) & 0x0000FF);
@@ -130,14 +133,9 @@ namespace Cssure.DecodingBytes
                     C1_diff = Convert_8bit_Sign_Value(tmp_buf);
                     index += 1;
                 }
-                #endregion
 
-                bitmask = (C2_compression >> (i * 2)) & 0x03; //Decodes the compression mask (0=1byte value, 1=2byte value, 2=3byte value)
-                //Tuple<int, int> C2_params = DecodeChannelDifference(bitmask, index, data, C2_diff);
-                //C2_diff = C2_params.Item1; // C2 difference
-                //index = C2_params.Item2; // Index
+                bitmask = (C2_compression >> (i * 2)) & 0x03;
 
-                #region To be deleted
                 if (bitmask == 2)
                 {
                     tmp_buf = ((data[index] << 16) & 0xFF0000) | ((data[index + 1] << 8) & 0x00FF00) | ((data[index + 2]) & 0x0000FF);
@@ -156,14 +154,14 @@ namespace Cssure.DecodingBytes
                     C2_diff = Convert_8bit_Sign_Value(tmp_buf);
                     index += 1;
                 }
-                #endregion
 
-                bitmask = (C3_compression >> (i * 2)) & 0x03; //Decodes the compression mask (0=1byte value, 1=2byte value, 2=3byte value)
+                bitmask = (C3_compression >> (i * 2)) & 0x03;
+
+                //Decodes the compression mask (0=1byte value, 1=2byte value, 2=3byte value)
                 //Tuple<int, int> C3_params = DecodeChannelDifference(bitmask, index, data, C3_diff);
                 //C3_diff = C3_params.Item1; // C3 difference
                 //index = C3_params.Item2; // Index
 
-                #region To be deleted
                 if (bitmask == 2)
                 {
                     tmp_buf = ((data[index] << 16) & 0xFF0000) | ((data[index + 1] << 8) & 0x00FF00) | ((data[index + 2]) & 0x0000FF);
@@ -182,7 +180,6 @@ namespace Cssure.DecodingBytes
                     C3_diff = Convert_8bit_Sign_Value(tmp_buf);
                     index += 1;
                 }
-                #endregion
 
 
                 if (index >= telegramLength)

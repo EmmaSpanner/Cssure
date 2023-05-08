@@ -5,8 +5,8 @@ namespace Cssure.Services
 {
     public interface IMQTTService
     {
-        void OpenConncetion();
-        void CloseConncetion();
+        void OpenConnection();
+        void CloseConnection();
         bool Publish_RawData(string topic, byte[] data);
 
     }

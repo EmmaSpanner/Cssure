@@ -12,33 +12,25 @@ namespace Cssure.Services
 
     public class MQTTServiceLocalPython : IPythonMQTTService
     {
-
+        private readonly string clientId;
         private readonly MqttClient client;
         public MqttClient Client => client;
 
         const byte QOS = MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE; //Defalut = QoS1
-        private readonly string clientId;
-
-
-
 
         public MQTTServiceLocalPython(IIpAdresses ipAdresses)
         {
-           
-
             var tempUrl = ipAdresses.getIP();
             var url = tempUrl.Split("//")[1].Split(":")[0];
 
-            client = new MqttClient("localhost");
+            client = new MqttClient(url);
             clientId = Guid.NewGuid().ToString();
-            
-        
         }
 
         /// <summary>
         /// Start MQTT service og conncet med LastWill 
         /// </summary>
-        public void OpenConncetion()
+        public void OpenConnection()
         {
             if (!Client.IsConnected)
             {
@@ -53,21 +45,18 @@ namespace Cssure.Services
                     keepAlivePeriod: 60,
                     willFlag: true,
                     willTopic: Topics.Topic_Status_CSSURE,
-                    willMessage: "Offine",
+                    willMessage: "Offline",
                     willRetain: true,
                     willQosLevel: QOS
                     );
 
                 Client.Publish(Topics.Topic_Status_CSSURE, System.Text.Encoding.UTF8.GetBytes("Online"), QOS, retain: true);
-
                 Client.Subscribe(new string[] { Topics.Topic_Status_Python }, new byte[] { QOS });
                 Client.Subscribe(new string[] { Topics.Topic_Series_Filtred }, new byte[] { QOS });
-
             }
         }
 
-
-        public void CloseConncetion()
+        public void CloseConnection()
         {
             if (Client.IsConnected)
             {
@@ -75,7 +64,6 @@ namespace Cssure.Services
                 Client.Disconnect();
             }
         }
-
 
         public bool Publish_RawData(string topic, byte[] message)
         {
@@ -86,7 +74,6 @@ namespace Cssure.Services
                 return succes;
             }
             return false;
-
         }
 
         /// <summary>
@@ -126,7 +113,5 @@ namespace Cssure.Services
         {
             Debug.WriteLine("Subscribed to topic " + e.MessageId);
         }
-
     }
-
 }

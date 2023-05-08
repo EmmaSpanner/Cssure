@@ -54,8 +54,8 @@ using (var serviceScope = app.Services.CreateScope())
 
     var myDependencyPython = services.GetRequiredService<IPythonMQTTService>();
     var myDependencyBssure = services.GetRequiredService<IBssureMQTTService>();
-    myDependencyPython.OpenConncetion();
-    myDependencyBssure.OpenConncetion();
+    myDependencyPython.OpenConnection();
+    myDependencyBssure.OpenConnection();
 }
 
 app.Run();

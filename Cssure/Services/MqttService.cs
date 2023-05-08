@@ -25,7 +25,7 @@
             clientId = Guid.NewGuid().ToString();
         }
 
-        public void OpenConncetion()
+        public void OpenConnection()
         {
             if (!Client.IsConnected)
             {
@@ -43,7 +43,7 @@
             }
         }
 
-        public void CloseConncetion()
+        public void CloseConnection()
         {
             if (Client.IsConnected)
             {
@@ -73,17 +73,11 @@
             {
                 if (e.Topic == Topics.Topic_Series_FromBSSURE)
                 {
-
                     var message = System.Text.Encoding.UTF8.GetString(e.Message);
                     var topic = e.Topic;
                     EKGSampleDTO temp = JsonSerializer.Deserialize<EKGSampleDTO>(message)!;
-                    //var serialData = JsonSerializer.Serialize<EKGSampleDTO>(data);
-                    //int[] bytesAsInts = Array.ConvertAll(e.Message, c => (int)c);
-                    //Console.WriteLine("Message received: " + string.Join(",", bytesAsInts));
-
                     await Task.Run(() => rawDataService.ProcessData(temp));
                 }
-
             }
         }
 
@@ -92,7 +86,5 @@
         {
             Console.WriteLine("Subscribed to topic: " + e.MessageId);
         }
-
-
     }
 }

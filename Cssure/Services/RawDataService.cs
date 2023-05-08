@@ -10,19 +10,29 @@ namespace Cssure.Services
     {
 
         private readonly IMQTTService mqttService;
+
+        // Buffering
+        private int nBufferSamples = 256 * 60 * 3; //45000 samples, 3750 batches
+        private ECGBatchSeriesData bufferedECG = new ECGBatchSeriesData()
+        {
+            ECGChannel1 = new List<int[]>(),
+            ECGChannel2 = new List<int[]>(),
+            ECGChannel3 = new List<int[]>(),
+            TimeStamp = new List<long>(),
+            Samples = 0,
+
+        };
+
         public RawDataService(IPythonMQTTService MQTTManager)
         {
             mqttService = MQTTManager;
         }
+
         public void ProcessData(EKGSampleDTO eKGSample)
         {
-            // Convert to signed bytes
-            sbyte[] bytes = eKGSample.rawBytes;
-            //sbyte[] SignedBytes = Array.ConvertAll(bytes, x => unchecked((sbyte)x));
-
             // Decode bytes
-            ECGBatchData ecgdata = DecodingBytes.DecodingByteArray.DecodeBytes(bytes);
-            ecgdata.PatientID = eKGSample.patientId;
+            ECGBatchData ecgdata = DecodingBytes.DecodingByteArray.DecodeBytes(eKGSample.RawBytes);
+            ecgdata.PatientID = eKGSample.PatientId;
             ecgdata.TimeStamp = eKGSample.Timestamp;
 
             // Buffer data for 3 minutes
@@ -42,25 +52,11 @@ namespace Cssure.Services
                     ModCSINormMax = new float[] { 9074, 8485, 8719 }
                 };
 
-
                 var serialData = JsonSerializer.Serialize<ECGBatchSeriesDataDTO>(dataDTO);
                 var bytess = System.Text.Encoding.UTF8.GetBytes(serialData);
                 mqttService.Publish_RawData(Topics.Topic_Series_Raw, bytess);
             }
         }
-
-
-        ECGBatchSeriesData bufferedECG = new ECGBatchSeriesData()
-        {
-            ECGChannel1 = new List<int[]>(),
-            ECGChannel2 = new List<int[]>(),
-            ECGChannel3 = new List<int[]>(),
-            TimeStamp = new List<long>(),
-            Samples = 0,
-
-        };
-
-        int nBufferSamples = 256 * 60 * 3; //45000 samples, 3750 batches
 
         private void BufferData(ECGBatchData ecgData)
         {
