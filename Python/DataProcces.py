@@ -217,14 +217,16 @@ def RearangeData(ecgdata):
     #So every channel needs to be fatteend out to a 1D array
     # and the timestamps needs to be extracted to create a same length array for the timestamps
     
-    ch1 = np.array(ecgdata['Ch1']).flatten()
-    ch2 = np.array(ecgdata['Ch2']).flatten()
-    ch3 = np.array(ecgdata['Ch3']).flatten()
-    timestamp_mock = np.zeros(len(ch1))
+    ch1 = np.array(ecgdata['ECGChannel1']).flatten().flatten()
+    ch2 = np.array(ecgdata['ECGChannel2']).flatten().flatten()
+    ch3 = np.array(ecgdata['ECGChannel3']).flatten().flatten()
     
     # add the timestampmock to each channel as a new row
-    ch1 = np.c_[timestamp_mock,ch1] 
+    timestamp_mock = np.zeros(len(ch1))
+    ch1 = np.c_[timestamp_mock,ch1]
+    timestamp_mock = np.zeros(len(ch2))
     ch2 = np.c_[timestamp_mock,ch2]
+    timestamp_mock = np.zeros(len(ch3))
     ch3 = np.c_[timestamp_mock,ch3]
     
     return ch1, ch2, ch3
@@ -235,7 +237,7 @@ def RearangeData(ecgdata):
 
 def TimeDiffer(ecgObject):
     # Calculate the time it took to get and process the data
-    t1 = ecgObject['Timestamp'][-1]
+    t1 = ecgObject['TimeStamp'][-1]/1000
     t2 = datetime.datetime.now().timestamp()
     tdif = t2-t1
     return tdif
@@ -249,7 +251,7 @@ def CalcParametres(data):
     # This is QRS detection    
     qrs_detector = QRSDetector(
         data,
-        plot_data=False, 
+        plot_data=True, 
         show_plot=True)
 
     # Extract the qrs peaks and the peak values
@@ -362,12 +364,12 @@ def RearangeDataBack(ecgObject, Findings_ch1, Findings_ch2, Findings_ch3, timeDi
     allParametres = dict()
         
     allParametres["PatientID"] = ecgObject["PatientID"]
-    allParametres["Timestamp"] = ecgObject["Timestamp"][-1]
+    allParametres["Timestamp"] = ecgObject["TimeStamp"][-1]
     allParametres["TimeProcess_s"] = timeDifferent
-    allParametres["SeriesLength_s"] = len(ecgObject["Timestamp"])*12/250
-    allParametres["Ch1"] = Findings_ch1
-    allParametres["Ch2"] = Findings_ch2
-    allParametres["Ch3"] = Findings_ch3
+    allParametres["SeriesLength_s"] = len(ecgObject["TimeStamp"])*12/250
+    allParametres["ECGChannel1"] = Findings_ch1
+    allParametres["ECGChannel2"] = Findings_ch2
+    allParametres["ECGChannel3"] = Findings_ch3
     return allParametres
 
 #endregion

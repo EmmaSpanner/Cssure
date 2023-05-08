@@ -29,7 +29,7 @@ namespace Cssure.Services
             var tempUrl = ipAdresses.getIP();
             var url = tempUrl.Split("//")[1].Split(":")[0];
 
-            client = new MqttClient("192.168.0.5");
+            client = new MqttClient("localhost");
             clientId = Guid.NewGuid().ToString();
             
         
