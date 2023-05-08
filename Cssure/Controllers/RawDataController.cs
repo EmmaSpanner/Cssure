@@ -39,7 +39,7 @@ namespace Cssure.Controllers
                 //RawData is send to backend for decoding and processing
                 //await Task.Run(() => rawDataService.ProcessData(bytes));
 
-                mqttService.Publish_RawData(Topics.Topic_Series_TempToBSSURE, bytes); 
+                mqttService.Publish_RawData(Topics.Topic_Series_FromBSSURE, bytes); 
                 Debug.WriteLine("In RawDataController, received data");
 
                 //If data is received succesfully the method returns an OK (Code 200) to patient App

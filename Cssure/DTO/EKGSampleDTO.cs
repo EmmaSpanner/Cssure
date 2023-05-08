@@ -2,7 +2,7 @@
 {
     public class EKGSampleDTO
     {
-        public byte[] rawBytes { get; set; }
+        public sbyte[] rawBytes { get; set; }
         public DateTimeOffset Timestamp { get; set; }
 
         public string patientId { get; set; }

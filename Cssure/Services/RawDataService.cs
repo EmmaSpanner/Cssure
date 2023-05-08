@@ -10,33 +10,10 @@ namespace Cssure.Services
     {
 
         private readonly IMQTTService mqttService;
-        public RawDataService(IPythonMQTTService MQTTManager)
-        {
-            mqttService = MQTTManager;
-        }
-        public void ProcessData(EKGSampleDTO eKGSample)
-        {
-
-            var bytes = eKGSample.rawBytes;
-            // TODO: Decodeing kan være her
-            // Decoded signal
-            sbyte[] signedBytes = (sbyte[])(Array)bytes;
-            sbyte[] SignedBytes = Array.ConvertAll(bytes, x => unchecked((sbyte)x));
-
-
-            ECGBatchData ecgdata = DecodingBytes.DecodingByteArray.DecodeBytes(SignedBytes);
-            ecgdata.PatientID = eKGSample.patientId;
-            ecgdata.TimeStamp = eKGSample.Timestamp;
-            BufferData(ecgdata);
-
-            if (ecgdata.Samples % 256 == 0)
-            {
-                mqttService.Publish_RawData(Topics.Topic_Series_Raw, JsonSerializer.SerializeToUtf8Bytes(bufferedECG));
-            }
-        }
-
-
-        ECGBatchSeriesData bufferedECG = new ECGBatchSeriesData()
+        
+        // Buffering
+        private int nBufferSamples = 256 * 60 * 3; //45000 samples, 3750 batches
+        private ECGBatchSeriesData bufferedECG = new ECGBatchSeriesData()
         {
             ECGChannel1 = new List<int[]>(),
             ECGChannel2 = new List<int[]>(),
@@ -45,16 +22,37 @@ namespace Cssure.Services
             Samples = 0
         };
 
-        int nBufferSamples = 256 * 60 * 3; //45000 samples, 3750 batches
+        public RawDataService(IPythonMQTTService MQTTManager)
+        {
+            mqttService = MQTTManager;
+        }
+        public void ProcessData(EKGSampleDTO eKGSample)
+        {
+            // Convert to signed bytes
+            sbyte[] bytes = eKGSample.rawBytes;
+            //sbyte[] SignedBytes = Array.ConvertAll(bytes, x => unchecked((sbyte)x));
+
+            // Decode bytes
+            ECGBatchData ecgdata = DecodingBytes.DecodingByteArray.DecodeBytes(bytes);
+            ecgdata.PatientID = eKGSample.patientId;
+            ecgdata.TimeStamp = eKGSample.Timestamp;
+
+            // Buffer data for 3 minutes
+            BufferData(ecgdata);
+
+            // Send data every minute
+            if (ecgdata.Samples % 256 == 0)
+            {
+                mqttService.Publish_RawData(Topics.Topic_Series_Raw, JsonSerializer.SerializeToUtf8Bytes(bufferedECG));
+            }
+        }
 
         private void BufferData(ECGBatchData ecgData)
         {
             int nCurrentSamples = bufferedECG.Samples;
             //TODO: dynamic length of data
-            // Buffer 3 minutes of data
-            // Send every minute
 
-            // Fill the data model with all batches from buffer
+            // Add new batch to buffer
             bufferedECG.ECGChannel1.Add(ecgData.ECGChannel1);
             bufferedECG.ECGChannel2.Add(ecgData.ECGChannel2);
             bufferedECG.ECGChannel3.Add(ecgData.ECGChannel3);
@@ -62,10 +60,10 @@ namespace Cssure.Services
             bufferedECG.Samples += 12;
             bufferedECG.PatientID = ecgData.PatientID;
 
-            //When buffer is full, start removing first in batch and add new batch to end of buffer
+            //When buffer is full, remove first batch
             if (nCurrentSamples >= nBufferSamples)
             {
-                // Removing first in from buffer (FIFO)
+                // Remove first batch from buffer (FIFO)
                 bufferedECG.ECGChannel1.RemoveAt(0);
                 bufferedECG.ECGChannel2.RemoveAt(0);
                 bufferedECG.ECGChannel3.RemoveAt(0);
