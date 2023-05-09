@@ -251,8 +251,8 @@ def CalcParametres(data):
     # This is QRS detection    
     qrs_detector = QRSDetector(
         data,
-        plot_data=True, 
-        show_plot=True)
+        plot_data=False, 
+        show_plot=False)
 
     # Extract the qrs peaks and the peak values
     peakIdx = qrs_detector.qrs_peaks_indices
