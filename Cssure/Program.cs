@@ -33,7 +33,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}else
+}
+else
 {
     // For mobile apps, allow http traffic.
     app.UseHttpsRedirection();

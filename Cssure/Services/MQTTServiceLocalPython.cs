@@ -23,7 +23,7 @@ namespace Cssure.Services
             var tempUrl = ipAdresses.getIP();
             var url = tempUrl.Split("//")[1].Split(":")[0];
 
-            client = new MqttClient("localhost");
+            client = new MqttClient("assure.au-dev.dk");
             clientId = Guid.NewGuid().ToString();
         }
 
@@ -39,8 +39,8 @@ namespace Cssure.Services
 
                 Client.Connect(
                     clientId: clientId,
-                    username: "",
-                    password: "",
+                     username: "s1",
+                    password: "passwordfors1",
                     cleanSession: false,
                     keepAlivePeriod: 60,
                     willFlag: true,
@@ -91,15 +91,34 @@ namespace Cssure.Services
                 CSI_DTO csi = JsonSerializer.Deserialize<CSI_DTO>(message)!;
                 Debug.WriteLine($"Message received from <<{topic}>>:");
                 Debug.WriteLine($"Vital parametres: " +
-                    $"\n \t Timestamp: {csi.Timestamp}" +
-                    $"\n \t len_rr: {csi.len_rr}" +
-                    $"\n \t HeartRate: {csi.mean_hr}" +
-                    $"\n \t CSI:{csi.csi} " +
-                    $"\n \t\t CSI30:{csi.csi_30} " +
-                    $"\n \t\t CSI50:{csi.csi_50} " +
-                    $"\n \t\t CSI100:{csi.csi_100}" +
-                    $"\n \t MOD_CSI: {csi.Modified_csi}" +
-                    $"\n \t\t MOD_CSI100: {csi.Modified_csi_100}" +
+                    $"\n \t PatientID: {csi.PatientID}" +
+                    $"\n \t TimeStamp: {csi.TimeStamp}" +
+                    $"\n \t SeriesLength_s: {csi.SeriesLength_s}" +
+                    $"\n \t TimeProcess_s:{csi.TimeProcess_s} " +
+                    $"\n \t len_rr:{csi.ECGChannel1.len_rr} " +
+
+                    $"\n \t mean_hr:{csi.ECGChannel1.mean_hr} " +
+                    $"\n \t\t mean_hr30:{csi.ECGChannel1.mean_hr30} " +
+                    $"\n \t\t mean_hr50:{csi.ECGChannel1.mean_hr50} " +
+                    $"\n \t\t mean_hr100:{csi.ECGChannel1.mean_hr100} " +
+
+
+                    $"\n \t CSI Values: " +
+                    $"\n \t\t CSI:{csi.ECGChannel1.csi} " +
+                    $"\n \t\t CSI30:{csi.ECGChannel1.CSI30} " +
+                    $"\n \t\t CSI50:{csi.ECGChannel1.CSI50} " +
+                    $"\n \t\t CSI100:{csi.ECGChannel1.CSI100} " +
+                    $"\n \t\t ModCSI:{csi.ECGChannel1.Modified_csi} " +
+                    $"\n \t\t ModCSI30:{csi.ECGChannel1.ModCSI30} " +
+                    $"\n \t\t ModCSI50:{csi.ECGChannel1.ModCSI50} " +
+                    $"\n \t\t ModCSI100:{csi.ECGChannel1.ModCSI100} " +
+
+
+                    $"\n \t Alarms: " +
+                    $"\n \t\t CSI30:{csi.Alarm.CSI30_Alarm} " +
+                    $"\n \t\t CSI50:{csi.Alarm.CSI50_Alarm} " +
+                    $"\n \t\t CSI100:{csi.Alarm.CSI100_Alarm}" +
+                    $"\n \t\t MOD_CSI: {csi.Alarm.ModCSI100_Alarm}" +
                     $"\n\n");
             }
             catch (Exception ex)

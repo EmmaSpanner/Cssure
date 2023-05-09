@@ -217,9 +217,12 @@ def RearangeData(ecgdata):
     #So every channel needs to be fatteend out to a 1D array
     # and the timestamps needs to be extracted to create a same length array for the timestamps
     
-    ch1 = np.array(ecgdata['ECGChannel1']).flatten().flatten()
-    ch2 = np.array(ecgdata['ECGChannel2']).flatten().flatten()
-    ch3 = np.array(ecgdata['ECGChannel3']).flatten().flatten()
+    ch1 = np.asarray(ecgdata['ECGChannel1'])
+    ch1 = ch1.reshape(-1)
+    ch2 = np.asarray(ecgdata['ECGChannel2'])
+    ch2 = ch2.reshape(-1)
+    ch3 = np.asarray(ecgdata['ECGChannel3'])
+    ch3 = ch3.reshape(-1)
     
     # add the timestampmock to each channel as a new row
     timestamp_mock = np.zeros(len(ch1))
@@ -270,10 +273,6 @@ def CalcParametres(data):
     # There should be at least 5 RR intervals to calculate the parametres
     if len(rr_interval)>4:
         
-        # Calculate the time domain parametres
-        # HR Mean, HR Std, etc.
-        time_domain_features_all = get_time_domain_features(rr_interval)
-        param['mean_hr'] = time_domain_features_all['mean_hr']
         
         # According to Jespers Jeppesens studie we need to calculate the csi 30, 50 and 100, and the modified csi 100 which needes 30, 50 and 100 RR intervals to be calculated
         # https://www.researchgate.net/publication/270658448_Using_Lorenz_plot_and_Cardiac_Sympathetic_Index_of_heart_rate_variability_for_detecting_seizures_for_patients_with_epilepsy
@@ -284,27 +283,41 @@ def CalcParametres(data):
             inter30 =  get_csi_cvi_features(res)
             param['CSI30'] = inter30['csi']
             param['ModCSI30'] = inter30['Modified_csi']
+            inter30 = get_time_domain_features(res)
+            param['mean_hr30'] = inter30['mean_hr']
         else: 
             param['CSI30'] =0
             param['ModCSI30'] = 0
+            param['mean_hr30'] = 0
         
         if len(rr_interval)>50:
             res = rr_interval[-50:]
             inter50 =  get_csi_cvi_features(res)
             param['CSI50'] = inter50['csi']
             param['ModCSI50'] = inter50['Modified_csi']
+            inter50 = get_time_domain_features(res)
+            param['mean_hr50'] = inter50['mean_hr']
         else: 
             param['CSI50'] = 0
             param['ModCSI50'] = 0
+            param['mean_hr50'] = 0
         
         if len(rr_interval)>100:
             res = rr_interval[-100:]
             inter100 =  get_csi_cvi_features(res)
             param['CSI100'] = inter100['csi']
             param['ModCSI100'] = inter100['Modified_csi']
+            inter100 = get_time_domain_features(res)
+            param['mean_hr100'] = inter100['mean_hr']
         else: 
             param['CSI100'] = 0
             param['ModCSI100'] = 0
+            param['mean_hr100'] = 0
+        
+        # Calculate the time domain parametres
+        # HR Mean, , etc.
+        time_domain_features_all = get_time_domain_features(rr_interval)
+        param['mean_hr'] = time_domain_features_all['mean_hr']
         
         # Calculate the non-linear domain parametres
         # CSI, Modified CSI, etc. for the full RR interval signal
@@ -334,39 +347,41 @@ def DecissionSupport(CSINormMax,ModCSINormMax,ch):
     ModCSI50 is not used
     ModCSI100 will be 1.80 times over the normal value 
     """
+    alarm = dict()
     if ch["CSI30"] / CSINormMax[0] > 1.65:
-        ch["CSI30_Alarm"] = "Seizure"
+        alarm["CSI30_Alarm"] = 1 #"Seizure"
     else:
-        ch["CSI30_Alarm"] = "No seizure"
+        alarm["CSI30_Alarm"] = 0 #"No seizure"
     
     if ch["CSI50"] / CSINormMax[1] > 2.15:
-        ch["CSI50_Alarm"] = "Seizure"
+        alarm["CSI50_Alarm"] = 1 #"Seizure"
     else:
-        ch["CSI50_Alarm"] = "No seizure"
+        alarm["CSI50_Alarm"] = 0 #"No seizure"
         
     if ch["CSI100"] / CSINormMax[2] > 1.57:
-        ch["CSI100_Alarm"] = "Seizure"
+        alarm["CSI100_Alarm"] = 1 #"Seizure"
     else:
-        ch["CSI100_Alarm"] = "No seizure"
+        alarm["CSI100_Alarm"] = 0 #"No seizure"
     
     if ch["ModCSI100"] / ModCSINormMax[2] > 1.80:
-        ch["ModCSI100_Alarm"] = "Seizure"
+        alarm["ModCSI100_Alarm"] = 1 #"Seizure"
     else:
-        ch["ModCSI100_Alarm"] = "No seizure"
+        alarm["ModCSI100_Alarm"] = 0 #"No seizure"
         
-    return ch
+    return alarm
     
 #endregion
 
 #region Step 5: Rearange the data
 
-def RearangeDataBack(ecgObject, Findings_ch1, Findings_ch2, Findings_ch3, timeDifferent):
+def RearangeDataBack(ecgObject, Findings_ch1, Findings_ch2, Findings_ch3, timeDifferent,Alarm):
     allParametres = dict()
         
     allParametres["PatientID"] = ecgObject["PatientID"]
-    allParametres["Timestamp"] = ecgObject["TimeStamp"][-1]
+    allParametres["TimeStamp"] = ecgObject["TimeStamp"][-1]
     allParametres["TimeProcess_s"] = timeDifferent
     allParametres["SeriesLength_s"] = len(ecgObject["TimeStamp"])*12/250
+    allParametres["Alarm"] = Alarm
     allParametres["ECGChannel1"] = Findings_ch1
     allParametres["ECGChannel2"] = Findings_ch2
     allParametres["ECGChannel3"] = Findings_ch3
@@ -393,21 +408,22 @@ def ProcessingAlgorihtm(message):
         ecgObject = DeserializeJson(message)
         ch1, ch2, ch3 = RearangeData(ecgObject)
         timeDifferent = TimeDiffer(ecgObject)
-        if timeDifferent>10:
+        if timeDifferent>1000:
             client.publish(Topic_Series_Filtred, "TimeError", qos=1, retain=True)
         else:
             Findings_ch1 = CalcParametres(ch1)
             Findings_ch2 = CalcParametres(ch2)
             Findings_ch3 = CalcParametres(ch3)
             
-            Findings_ch1 = DecissionSupport(ecgObject['CSINormMax'],ecgObject['ModCSINormMax'],Findings_ch1)
+            Alarm = DecissionSupport(ecgObject['CSINormMax'],ecgObject['ModCSINormMax'],Findings_ch1)
             
             
-            allParametres = RearangeDataBack(ecgObject,Findings_ch1, Findings_ch2, Findings_ch3, timeDifferent)
+            allParametres = RearangeDataBack(ecgObject,Findings_ch1, Findings_ch2, Findings_ch3, timeDifferent,Alarm)
             json_object = EncodeJson(allParametres)
             PublishData(json_object)
     except:
         client.publish(Topic_Series_Filtred, "Error", qos=1, retain=True)
+        
 
 #endregion
 
@@ -428,7 +444,8 @@ client.on_subscribe = on_subscribe
 
 # Create the last will message
 client.will_set(Topic_Status_Python, payload="Offline", qos=0, retain=True)
-client.connect(host="localhost", port=1883, keepalive=120)
+client.username_pw_set(username="s1",password="passwordfors1")
+client.connect(host="assure.au-dev.dk", port=1883, keepalive=120)
 
 
 # Will run the client forever, unless you interrupt it

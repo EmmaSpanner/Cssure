@@ -21,7 +21,7 @@
             var tempUrl = ipAdresses.getIP();
             var url = tempUrl.Split("//")[1].Split(":")[0];
 
-            client = new MqttClient(url);
+            client = new MqttClient("assure.au-dev.dk");
             clientId = Guid.NewGuid().ToString();
         }
 
@@ -33,7 +33,19 @@
 
                 Client.MqttMsgSubscribed += client_MqttMsqSubsribed;
 
-                Client.Connect(clientId);
+                //Client.Connect(clientId);
+                Client.Connect(
+                        clientId: clientId,
+                        username: "s1",
+                        password: "passwordfors1",
+                        cleanSession: false,
+                        keepAlivePeriod: 60,
+                        willFlag: true,
+                        willTopic: Topics.Topic_Status_CSSURE,
+                        willMessage: "Offline",
+                        willRetain: true,
+                        willQosLevel: MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE
+                        );
 
                 //client.Subscribe(new string[] { "SeizureDetectionSystem" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
                 //Publish("SeizureDetectionSystem", System.Text.Encoding.UTF8.GetBytes("Hej fra Cssure"));

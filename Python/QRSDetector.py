@@ -187,7 +187,7 @@ class QRSDetector(object):
         def plot_points(axis, values, indices):
             axis.scatter(x=indices, y=values[indices], c="black", s=50, zorder=2)
 
-        plt.close('all')
+        # plt.close('all')
         fig, axarr = plt.subplots(6, sharex=True, figsize=(15, 18))
 
         plot_data(axis=axarr[0], data=self.ecg_data_raw[:, 1], title='Raw ECG measurements')
@@ -203,9 +203,10 @@ class QRSDetector(object):
         #fig.savefig(self.plot_path)
 
         if show_plot:
-            plt.show()
+            # plt.show()
+            plt.draw()
 
-        plt.close()
+        # plt.close()
 
     """Tools methods."""
 
