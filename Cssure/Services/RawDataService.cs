@@ -1,9 +1,9 @@
 ﻿using Cssure.Constants;
 using Cssure.DTO;
 using Cssure.Models;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text.Json;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -33,32 +33,41 @@ namespace Cssure.Services
 
         public void ProcessData(EKGSampleDTO eKGSample)
         {
-            // Decode bytes
-            ECGBatchData ecgdata = DecodingBytes.DecodingByteArray.DecodeBytes(eKGSample.RawBytes);
-            ecgdata.PatientID = eKGSample.PatientId;
-            ecgdata.TimeStamp = eKGSample.Timestamp;
-
-            // Buffer data for 3 minutes
-            BufferData(ecgdata);
-
-            if (bufferedECG.Samples % 252 == 0)
+            try
             {
-                ECGBatchSeriesDataDTO dataDTO = new ECGBatchSeriesDataDTO()
-                {
-                    ECGChannel1 = bufferedECG.ECGChannel1.ToArray(),
-                    ECGChannel2 = bufferedECG.ECGChannel2.ToArray(),
-                    ECGChannel3 = bufferedECG.ECGChannel3.ToArray(),
-                    TimeStamp = bufferedECG.TimeStamp.ToArray(),
-                    Samples = bufferedECG.Samples,
-                    PatientID = bufferedECG.PatientID,
-                    CSINormMax = new float[] { 15.35f, 15.49f, 17.31f },
-                    ModCSINormMax = new float[] { 9074, 8485, 8719 }
-                };
 
-                var serialData = JsonSerializer.Serialize<ECGBatchSeriesDataDTO>(dataDTO);
-                var bytess = System.Text.Encoding.UTF8.GetBytes(serialData);
-                mqttService.Publish_RawData(Topics.Topic_Series_Raw, bytess);
+                // Decode bytes
+                ECGBatchData ecgdata = DecodingBytes.DecodingByteArray.DecodeBytes(eKGSample.RawBytes);
+                ecgdata.PatientID = eKGSample.PatientId;
+                ecgdata.TimeStamp = eKGSample.Timestamp;
+
+                // Buffer data for 3 minutes
+                BufferData(ecgdata);
+
+                if (bufferedECG.Samples % 252 == 0)
+                {
+                    ECGBatchSeriesDataDTO dataDTO = new ECGBatchSeriesDataDTO()
+                    {
+                        ECGChannel1 = bufferedECG.ECGChannel1.ToArray(),
+                        ECGChannel2 = bufferedECG.ECGChannel2.ToArray(),
+                        ECGChannel3 = bufferedECG.ECGChannel3.ToArray(),
+                        TimeStamp = bufferedECG.TimeStamp.ToArray(),
+                        Samples = bufferedECG.Samples,
+                        PatientID = bufferedECG.PatientID,
+                        CSINormMax = new float[] { 15.35f, 15.49f, 17.31f },
+                        ModCSINormMax = new float[] { 9074, 8485, 8719 }
+                    };
+
+                    var serialData = JsonSerializer.Serialize<ECGBatchSeriesDataDTO>(dataDTO);
+                    var bytess = System.Text.Encoding.UTF8.GetBytes(serialData);
+                    mqttService.Publish_RawData(Topics.Topic_Series_Raw, bytess);
+                }
             }
+            catch (Exception)
+            {
+                Debug.WriteLine("ProcessData(EKGSampleDTO eKGSample)");
+            }
+
         }
 
         private void BufferData(ECGBatchData ecgData)
@@ -67,18 +76,18 @@ namespace Cssure.Services
             //TODO: dynamic length of data
 
             // Add new batch to buffer
-            bufferedECG.ECGChannel1.Add(new int[] { 
-                ecgData.ECGChannel1[0], 
-                ecgData.ECGChannel1[1], 
-                ecgData.ECGChannel1[2], 
-                ecgData.ECGChannel1[3], 
-                ecgData.ECGChannel1[4], 
-                ecgData.ECGChannel1[5], 
-                ecgData.ECGChannel1[6], 
-                ecgData.ECGChannel1[7], 
-                ecgData.ECGChannel1[8], 
-                ecgData.ECGChannel1[9], 
-                ecgData.ECGChannel1[10], 
+            bufferedECG.ECGChannel1.Add(new int[] {
+                ecgData.ECGChannel1[0],
+                ecgData.ECGChannel1[1],
+                ecgData.ECGChannel1[2],
+                ecgData.ECGChannel1[3],
+                ecgData.ECGChannel1[4],
+                ecgData.ECGChannel1[5],
+                ecgData.ECGChannel1[6],
+                ecgData.ECGChannel1[7],
+                ecgData.ECGChannel1[8],
+                ecgData.ECGChannel1[9],
+                ecgData.ECGChannel1[10],
                 ecgData.ECGChannel1[11] });
             bufferedECG.ECGChannel2.Add(new int[] {
                 ecgData.ECGChannel2[0],

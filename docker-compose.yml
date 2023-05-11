@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  cssure:
+      image: memilnie/cssure:v1
+      container_name: DotNet_cssure
+
+      restart: unless-stopped
+
+  mqtt:
+      image: memilnie/csi_calculator:v2
+      network_mode: bridge
+      container_name: Python_csi_calculator
+
+      restart: unless-stopped

@@ -118,6 +118,8 @@ import numpy as np #pip install numpy
 import json #pip install json
 import datetime  #pip install datetime
 
+import os
+
 #endregion
 
 #region Step 0: Setup the MQTT client
@@ -421,8 +423,12 @@ def ProcessingAlgorihtm(message):
             allParametres = RearangeDataBack(ecgObject,Findings_ch1, Findings_ch2, Findings_ch3, timeDifferent,Alarm)
             json_object = EncodeJson(allParametres)
             PublishData(json_object)
-    except:
-        client.publish(Topic_Series_Filtred, "Error", qos=1, retain=True)
+    except Exception as e:
+        client.publish(Topic_Series_Filtred, "An error occured in the processing algorithm." + "\n" +e, qos=1, retain=True)
+        print(
+        "An error occured in the processing algorithm. \n"
+        )
+        print(e)
         
 
 #endregion
@@ -444,9 +450,27 @@ client.on_subscribe = on_subscribe
 
 # Create the last will message
 client.will_set(Topic_Status_Python, payload="Offline", qos=0, retain=True)
-client.username_pw_set(username="s1",password="passwordfors1")
-client.connect(host="assure.au-dev.dk", port=1883, keepalive=120)
+# client.username_pw_set(username="s1",password="passwordfors1")
 
+broker_address= "assure.au-dev.dk"
+print("Connecting to MQTT broker... \n with host: " + broker_address)
+try:
+    client.username_pw_set(username="s1",password="passwordfors1")
+    client.connect(host=broker_address, port=1883, keepalive=120)
+    
+except ConnectionRefusedError as e:
+        client.publish(Topic_Series_Filtred, "First attempt to connect fails because the docker container for the MQTT server needs to start." + "\n" +e, qos=1, retain=True)
+        
+        print(
+        "First attempt to connect fails because the docker container for the MQTT server needs to start."
+        )
+        print(e)
+except Exception as e:
+        client.publish(Topic_Series_Filtred, "An error occured in the processing algorithm." + "\n" +str(e) , qos=1, retain=True)
+        print(
+        "An error occured in the processing algorithm. \n"
+        )
+        print(str(e))
 
 # Will run the client forever, unless you interrupt it
 client.loop_forever()

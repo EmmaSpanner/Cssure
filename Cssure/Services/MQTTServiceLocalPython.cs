@@ -44,13 +44,13 @@ namespace Cssure.Services
                     cleanSession: false,
                     keepAlivePeriod: 60,
                     willFlag: true,
-                    willTopic: Topics.Topic_Status_CSSURE,
+                    willTopic: Topics.Topic_Status_CSSURE + "/py",
                     willMessage: "Offline",
                     willRetain: true,
                     willQosLevel: QOS
                     );
 
-                Client.Publish(Topics.Topic_Status_CSSURE, System.Text.Encoding.UTF8.GetBytes("Online"), QOS, retain: true);
+                Client.Publish(Topics.Topic_Status_CSSURE + "/py", System.Text.Encoding.UTF8.GetBytes("Online"), QOS, retain: true);
                 Client.Subscribe(new string[] { Topics.Topic_Status_Python }, new byte[] { QOS });
                 Client.Subscribe(new string[] { Topics.Topic_Series_Filtred }, new byte[] { QOS });
             }
@@ -84,47 +84,56 @@ namespace Cssure.Services
         /// <param name="e"></param>
         private void MQTTMessageReceivedCSIdata(object sender, MqttMsgPublishEventArgs e)
         {
-            var message = System.Text.Encoding.UTF8.GetString(e.Message);
-            var topic = e.Topic;
+            string topic = e.Topic;
             try
             {
-                CSI_DTO csi = JsonSerializer.Deserialize<CSI_DTO>(message)!;
-                Debug.WriteLine($"Message received from <<{topic}>>:");
-                Debug.WriteLine($"Vital parametres: " +
-                    $"\n \t PatientID: {csi.PatientID}" +
-                    $"\n \t TimeStamp: {csi.TimeStamp}" +
-                    $"\n \t SeriesLength_s: {csi.SeriesLength_s}" +
-                    $"\n \t TimeProcess_s:{csi.TimeProcess_s} " +
-                    $"\n \t len_rr:{csi.ECGChannel1.len_rr} " +
+                if (topic == Topics.Topic_Status_Python)
+                {
+                    Debug.WriteLine(e.Message.ToString());
+                }
+                else if (topic == Topics.Topic_Series_Filtred)
+                {
 
-                    $"\n \t mean_hr:{csi.ECGChannel1.mean_hr} " +
-                    $"\n \t\t mean_hr30:{csi.ECGChannel1.mean_hr30} " +
-                    $"\n \t\t mean_hr50:{csi.ECGChannel1.mean_hr50} " +
-                    $"\n \t\t mean_hr100:{csi.ECGChannel1.mean_hr100} " +
+                    var message = System.Text.Encoding.UTF8.GetString(e.Message);
+                    CSI_DTO csi = JsonSerializer.Deserialize<CSI_DTO>(message)!;
+                    Debug.WriteLine($"Message received from <<{topic}>>:");
+                    Debug.WriteLine($"Vital parametres: " +
+                        $"\n \t PatientID: {csi.PatientID}" +
+                        $"\n \t TimeStamp: {csi.TimeStamp}" +
+                        $"\n \t SeriesLength_s: {csi.SeriesLength_s}" +
+                        $"\n \t TimeProcess_s:{csi.TimeProcess_s} " +
+                        $"\n \t len_rr:{csi.ECGChannel1.len_rr} " +
 
-
-                    $"\n \t CSI Values: " +
-                    $"\n \t\t CSI:{csi.ECGChannel1.csi} " +
-                    $"\n \t\t CSI30:{csi.ECGChannel1.CSI30} " +
-                    $"\n \t\t CSI50:{csi.ECGChannel1.CSI50} " +
-                    $"\n \t\t CSI100:{csi.ECGChannel1.CSI100} " +
-                    $"\n \t\t ModCSI:{csi.ECGChannel1.Modified_csi} " +
-                    $"\n \t\t ModCSI30:{csi.ECGChannel1.ModCSI30} " +
-                    $"\n \t\t ModCSI50:{csi.ECGChannel1.ModCSI50} " +
-                    $"\n \t\t ModCSI100:{csi.ECGChannel1.ModCSI100} " +
+                        $"\n \t mean_hr:{csi.ECGChannel1.mean_hr} " +
+                        $"\n \t\t mean_hr30:{csi.ECGChannel1.mean_hr30} " +
+                        $"\n \t\t mean_hr50:{csi.ECGChannel1.mean_hr50} " +
+                        $"\n \t\t mean_hr100:{csi.ECGChannel1.mean_hr100} " +
 
 
-                    $"\n \t Alarms: " +
-                    $"\n \t\t CSI30:{csi.Alarm.CSI30_Alarm} " +
-                    $"\n \t\t CSI50:{csi.Alarm.CSI50_Alarm} " +
-                    $"\n \t\t CSI100:{csi.Alarm.CSI100_Alarm}" +
-                    $"\n \t\t MOD_CSI: {csi.Alarm.ModCSI100_Alarm}" +
-                    $"\n\n");
+                        $"\n \t CSI Values: " +
+                        $"\n \t\t CSI:{csi.ECGChannel1.csi} " +
+                        $"\n \t\t CSI30:{csi.ECGChannel1.CSI30} " +
+                        $"\n \t\t CSI50:{csi.ECGChannel1.CSI50} " +
+                        $"\n \t\t CSI100:{csi.ECGChannel1.CSI100} " +
+                        $"\n \t\t ModCSI:{csi.ECGChannel1.Modified_csi} " +
+                        $"\n \t\t ModCSI30:{csi.ECGChannel1.ModCSI30} " +
+                        $"\n \t\t ModCSI50:{csi.ECGChannel1.ModCSI50} " +
+                        $"\n \t\t ModCSI100:{csi.ECGChannel1.ModCSI100} " +
+
+
+                        $"\n \t Alarms: " +
+                        $"\n \t\t CSI30:{csi.Alarm.CSI30_Alarm} " +
+                        $"\n \t\t CSI50:{csi.Alarm.CSI50_Alarm} " +
+                        $"\n \t\t CSI100:{csi.Alarm.CSI100_Alarm}" +
+                        $"\n \t\t MOD_CSI: {csi.Alarm.ModCSI100_Alarm}" +
+                        $"\n\n");
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                Debug.WriteLine($"Message received from <<{topic}>>: " + message);
+                Debug.WriteLine("HER");
+                Debug.WriteLine(ex.ToString());
+                Debug.WriteLine($"Message received from <<{topic}>>: " + e.Message);
             }
         }
 
