@@ -33,7 +33,7 @@ namespace Cssure.Services
             //this.processedDataService = processedDataService;
             UserList = userList;
             string host = "assure.au-dev.dk";
-            host = "localhost";
+            //host = "localhost";
             client = new MqttClient(host);
             clientId = Guid.NewGuid().ToString();
         }
@@ -50,7 +50,7 @@ namespace Cssure.Services
 
                 Client.Connect(
                     clientId: clientId,
-                     username: "s1",
+                    username: "s1",
                     password: "passwordfors1",
                     cleanSession: false,
                     keepAlivePeriod: 60,
