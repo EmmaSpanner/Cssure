@@ -1,5 +1,6 @@
 ﻿using Cssure.Constants;
 using Cssure.DTO;
+using Cssure.Models;
 using Cssure.MongoDB.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -20,12 +21,20 @@ namespace Cssure.Services
 
         const byte QOS = MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE; //Defalut = QoS1
 
-        public MQTTServiceLocalPython(ProcessedECGDataService processedDataService)
-        {
-           
-            this.processedDataService = processedDataService;
+        //Todo: Db interaktion
+        //public MQTTServiceLocalPython(ProcessedECGDataService processedDataService)
 
-            client = new MqttClient("assure.au-dev.dk");
+
+        public UserList UserList { get; }
+
+        public MQTTServiceLocalPython(UserList userList)
+        {
+            //Todo: Db interaktion
+            //this.processedDataService = processedDataService;
+            UserList = userList;
+            string host = "assure.au-dev.dk";
+            host = "localhost";
+            client = new MqttClient(host);
             clientId = Guid.NewGuid().ToString();
         }
 
@@ -89,20 +98,37 @@ namespace Cssure.Services
             string topic = e.Topic;
             try
             {
-                
 
-               
+                var message = System.Text.Encoding.UTF8.GetString(e.Message);
                 if (topic == Topics.Topic_Status_Python)
                 {
-                    Debug.WriteLine(e.Message.ToString());
+                    Debug.WriteLine(message.ToString());
                 }
                 else if (topic == Topics.Topic_Series_Filtred)
                 {
 
-               
-                    var message = System.Text.Encoding.UTF8.GetString(e.Message);
+                    //var message = System.Text.Encoding.UTF8.GetString(e.Message);
                     CSI_DTO csi = JsonSerializer.Deserialize<CSI_DTO>(message)!;
-                    await processedDataService.postCSI(csi);
+
+                    if (!csi.Alarm.CSI30_Alarm || csi.Alarm.CSI50_Alarm || csi.Alarm.CSI100_Alarm || csi.Alarm.ModCSI100_Alarm)
+                    {
+                        if (UserList.Users.ContainsKey(csi.PatientID))
+                        {
+                            IUserMetadata user = UserList.Users[csi.PatientID];
+                            string[] userEmails = user.GetCaregiversEmail();
+                        }
+                        //Todo: Sent Email here
+                    }
+                    else
+                    {
+                        //Everythings is normal
+                    }
+
+
+                    //Todo: Db interaktion
+                    //await processedDataService.postCSI(csi);
+
+
                     Debug.WriteLine($"Message received from <<{topic}>>:");
                     Debug.WriteLine($"Vital parametres: " +
                         $"\n \t PatientID: {csi.PatientID}" +
@@ -132,7 +158,7 @@ namespace Cssure.Services
                         $"\n \t\t CSI30:{csi.Alarm.CSI30_Alarm} " +
                         $"\n \t\t CSI50:{csi.Alarm.CSI50_Alarm} " +
                         $"\n \t\t CSI100:{csi.Alarm.CSI100_Alarm}" +
-                        $"\n \t\t MOD_CSI: {csi.Alarm.ModCSI100_Alarm}" +
+                        $"\n \t\t MOD_CSI:{csi.Alarm.ModCSI100_Alarm}" +
                         $"\n\n");
                 }
             }

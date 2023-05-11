@@ -15,6 +15,7 @@ namespace Cssure.Services
     {
 
         private readonly IMQTTService mqttService;
+        public UserList UserList { get; }
         private readonly DecodedECGDataService decodedService;
         private readonly RawECGDataService rawService;
 
@@ -31,19 +32,26 @@ namespace Cssure.Services
 
         };
 
-        public RawDataService(IPythonMQTTService MQTTManager, DecodedECGDataService decodedService, RawECGDataService rawService)
+        //public RawDataService(IPythonMQTTService MQTTManager, DecodedECGDataService decodedService, RawECGDataService rawService)
+        //Todo: Db interaktion
+        public RawDataService(IPythonMQTTService MQTTManager, UserList userList)
         {
             mqttService = MQTTManager;
-            this.decodedService = decodedService;
-            this.rawService = rawService;
+            UserList = userList;
+            //Todo: Db interaktion
+            //this.decodedService = decodedService;
+            //this.rawService = rawService;
         }
 
         public async void ProcessData(EKGSampleDTO eKGSample)
         {
             //Save raw data in database
-            await rawService.postRaw(eKGSample);
+            //Todo: Db interaktion
+            //await rawService.postRaw(eKGSample);
+
+
             // Decode bytes
- 
+
             try
             {
 
@@ -52,14 +60,29 @@ namespace Cssure.Services
                 ecgdata.PatientID = eKGSample.PatientId;
                 ecgdata.TimeStamp = eKGSample.Timestamp;
 
-            //Save decoded data in database
-            await decodedService.postDecoded(ecgdata);
+                //Save decoded data in database
+                //Todo: Db interaktion
+                //await decodedService.postDecoded(ecgdata);
 
-            // Buffer data for 3 minutes
-            BufferData(ecgdata);
+                // Buffer data for 3 minutes
+                BufferData(ecgdata);
 
                 if (bufferedECG.Samples % 252 == 0)
                 {
+                    float[] CSINormMaxtemp;
+                    float[] ModCSINormMaxtemp;
+                    if (UserList.Users.ContainsKey(ecgdata.PatientID))
+                    {
+                        IUserMetadata temp = UserList.Users[ecgdata.PatientID];
+                        CSINormMaxtemp = temp.GetMaxNormalCsi();
+                        ModCSINormMaxtemp = temp.GetMaxNormalModCsi();
+                    }
+                    else
+                    {
+                        CSINormMaxtemp = new float[] { 15.35f, 15.49f, 17.31f };
+                        ModCSINormMaxtemp = new float[] { 9074, 8485, 8719 };
+
+                    }
                     ECGBatchSeriesDataDTO dataDTO = new ECGBatchSeriesDataDTO()
                     {
                         ECGChannel1 = bufferedECG.ECGChannel1.ToArray(),
@@ -68,11 +91,13 @@ namespace Cssure.Services
                         TimeStamp = bufferedECG.TimeStamp.ToArray(),
                         Samples = bufferedECG.Samples,
                         PatientID = bufferedECG.PatientID,
-                        CSINormMax = new float[] { 15.35f, 15.49f, 17.31f },
-                        ModCSINormMax = new float[] { 9074, 8485, 8719 }
+                        CSINormMax = CSINormMaxtemp,
+                        ModCSINormMax = ModCSINormMaxtemp
                     };
 
-                    var serialData = JsonSerializer.Serialize<ECGBatchSeriesDataDTO>(dataDTO);
+
+                    var options = new JsonSerializerOptions { WriteIndented = true };
+                    var serialData = JsonSerializer.Serialize<ECGBatchSeriesDataDTO>(dataDTO, options);
                     var bytess = System.Text.Encoding.UTF8.GetBytes(serialData);
                     mqttService.Publish_RawData(Topics.Topic_Series_Raw, bytess);
                 }

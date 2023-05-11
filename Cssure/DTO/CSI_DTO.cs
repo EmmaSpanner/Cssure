@@ -17,10 +17,10 @@ namespace Cssure.DTO
 
     public class Alarm
     {
-        public int CSI30_Alarm { get; set; }
-        public int CSI50_Alarm { get; set; }
-        public int CSI100_Alarm { get; set; }
-        public int ModCSI100_Alarm { get; set; }
+        public bool CSI30_Alarm { get; set; }
+        public bool CSI50_Alarm { get; set; }
+        public bool CSI100_Alarm { get; set; }
+        public bool ModCSI100_Alarm { get; set; }
     }
 
 

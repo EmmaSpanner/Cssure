@@ -1,5 +1,6 @@
 using Cssure;
 using Cssure.Constants;
+using Cssure.Models;
 using Cssure.MongoDB;
 using Cssure.MongoDB.Services;
 using Cssure.Services;
@@ -14,19 +15,25 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
-builder.Services.Configure<EcgDataDb>(builder.Configuration.GetSection(nameof(EcgDataDb)));
 
-builder.Services.AddSingleton<MongoService>();
-builder.Services.AddSingleton<ProcessedECGDataService>();
-builder.Services.AddSingleton<RawECGDataService>();
-builder.Services.AddSingleton<DecodedECGDataService>();
 
+//Todo: Db interaktion
+//builder.Services.Configure<EcgDataDb>(builder.Configuration.GetSection(nameof(EcgDataDb)));
+//builder.Services.AddSingleton<MongoService>();
+//builder.Services.AddSingleton<ProcessedECGDataService>();
+//builder.Services.AddSingleton<RawECGDataService>();
+//builder.Services.AddSingleton<DecodedECGDataService>();
+
+
+//MQTT service
 builder.Services.AddSingleton<IBssureMQTTService, MqttService>();
 builder.Services.AddSingleton<IRawDataService, RawDataService>();
 
 //Very important that MQTTServiceLocalPython is below RawDataService and 
 //MqttService is above
 builder.Services.AddSingleton<IPythonMQTTService, MQTTServiceLocalPython>();
+
+builder.Services.AddSingleton<UserList>();
 
 
 builder.Services.AddControllers();

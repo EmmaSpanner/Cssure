@@ -2,6 +2,7 @@
 {
     using Cssure.Constants;
     using Cssure.DTO;
+    using Cssure.Models;
     using Cssure.MongoDB;
     using Cssure.MongoDB.Services;
     using System;
@@ -14,14 +15,14 @@
         private readonly MqttClient client;
         private readonly string clientId;
         private IRawDataService rawDataService;
-        private ProcessedECGDataService service;
         public MqttClient Client => client;
-        public MqttService(IRawDataService rawDataService, ProcessedECGDataService service)
+
+        public UserList UserList { get; }
+
+        public MqttService(IRawDataService rawDataService, UserList userList)
         {
             this.rawDataService = rawDataService;
-            this.service = service;
-
-
+            UserList = userList;
             client = new MqttClient("assure.au-dev.dk");
             clientId = Guid.NewGuid().ToString();
         }
@@ -85,12 +86,28 @@
 
             if (Client.IsConnected)
             {
-                if (e.Topic == Topics.Topic_Series_FromBSSURE)
+                var message = System.Text.Encoding.UTF8.GetString(e.Message);
+                var topic = e.Topic;
+                if (topic == Topics.Topic_Series_FromBSSURE)
                 {
-                    var message = System.Text.Encoding.UTF8.GetString(e.Message);
-                    var topic = e.Topic;
                     EKGSampleDTO temp = JsonSerializer.Deserialize<EKGSampleDTO>(message)!;
                     await Task.Run(() => rawDataService.ProcessData(temp));
+                }
+                else if (topic.Contains("ECG/Userdata"))
+                {
+                    UserDataDTO temp = JsonSerializer.Deserialize<UserDataDTO>(message)!;
+                    UsersMetadata usersMetadata = new UsersMetadata(temp.UserId, 0, temp.Emails, temp.CSINormMax, temp.ModCSINormMax);
+                    
+                    if (!UserList.Users.ContainsKey(temp.UserId))
+                    {
+                        UserList.Users.Add(temp.UserId, usersMetadata);
+                    }
+                    else
+                    {
+                        UserList.Users[temp.UserId] = usersMetadata;
+                    }
+
+
                 }
             }
         }
