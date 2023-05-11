@@ -1,5 +1,6 @@
 ﻿namespace Cssure.Services
 {
+    using Cssure.AlarmSenders;
     using Cssure.Constants;
     using Cssure.DTO;
     using System;
@@ -12,10 +13,11 @@
         private readonly MqttClient client;
         private readonly string clientId;
         private IRawDataService rawDataService;
-
+        private IEmailSender alarmService;
         public MqttClient Client => client;
-        public MqttService(IIpAdresses ipAdresses, IRawDataService rawDataService)
+        public MqttService(IIpAdresses ipAdresses, IRawDataService rawDataService, IEmailSender alarmService)
         {
+            this.alarmService = alarmService;
             this.rawDataService = rawDataService;
 
             var tempUrl = ipAdresses.getIP();
@@ -23,6 +25,7 @@
 
             client = new MqttClient("assure.au-dev.dk");
             clientId = Guid.NewGuid().ToString();
+            this.alarmService = alarmService;
         }
 
         public void OpenConnection()
@@ -94,8 +97,9 @@
         }
 
         //This code runs when the client has subscribed to a topic
-        void client_MqttMsqSubsribed(object senser, MqttMsgSubscribedEventArgs e)
+        async void client_MqttMsqSubsribed(object senser, MqttMsgSubscribedEventArgs e)
         {
+            await alarmService.SendEmailAsync("emmaspanner1997@gmail.com", "Test", "Test hopefully succeeded");
             Console.WriteLine("Subscribed to topic: " + e.MessageId);
         }
     }

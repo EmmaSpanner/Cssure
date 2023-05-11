@@ -1,4 +1,5 @@
 using Cssure;
+using Cssure.AlarmSenders;
 using Cssure.Constants;
 using Cssure.Services;
 using Microsoft.AspNetCore.Builder;
@@ -15,6 +16,7 @@ builder.Services.AddSwaggerGen();
 
 var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";").Last();
 
+builder.Services.AddTransient<IEmailSender, EmailAlarmService>();
 builder.Services.AddSingleton <IIpAdresses>(new IpAdresses(url));
 
 builder.Services.AddSingleton<IBssureMQTTService, MqttService>();

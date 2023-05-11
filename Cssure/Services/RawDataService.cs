@@ -9,6 +9,11 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Cssure.Services
 {
+    public interface IRawDataService
+    {
+        void ProcessData(EKGSampleDTO bytes);
+    }
+
     public class RawDataService : IRawDataService
     {
 

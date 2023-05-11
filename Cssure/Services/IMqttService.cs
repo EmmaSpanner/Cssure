@@ -10,7 +10,7 @@ namespace Cssure.Services
         bool Publish_RawData(string topic, byte[] data);
 
     }
-
+     
     public interface IPythonMQTTService : IMQTTService
     {
 
