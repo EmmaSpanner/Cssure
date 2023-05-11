@@ -27,6 +27,7 @@ builder.Services.AddSingleton<DecodedECGDataService>();
 
 builder.Services.AddSingleton<IBssureMQTTService, MqttService>();
 builder.Services.AddSingleton<IRawDataService, RawDataService>();
+
 //Very important that MQTTServiceLocalPython is below RawDataService and 
 //MqttService is above
 builder.Services.AddSingleton<IPythonMQTTService, MQTTServiceLocalPython>();
@@ -39,16 +40,8 @@ var app = builder.Build();
 
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-else
-{
-    // For mobile apps, allow http traffic.
-    app.UseHttpsRedirection();
-}
+app.UseHttpsRedirection();
+
 
 
 //app.UseHttpsRedirection();
