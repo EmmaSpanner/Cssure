@@ -1,5 +1,7 @@
 using Cssure;
 using Cssure.Constants;
+using Cssure.MongoDB;
+using Cssure.MongoDB.Services;
 using Cssure.Services;
 using Microsoft.AspNetCore.Builder;
 using System.Net;
@@ -12,10 +14,16 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<EcgDataDb>(builder.Configuration.GetSection(nameof(EcgDataDb)));
+
 
 var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";").Last();
 
 builder.Services.AddSingleton <IIpAdresses>(new IpAdresses(url));
+builder.Services.AddSingleton<MongoService>();
+builder.Services.AddSingleton<ProcessedECGDataService>();
+builder.Services.AddSingleton<RawECGDataService>();
+builder.Services.AddSingleton<DecodedECGDataService>();
 
 builder.Services.AddSingleton<IBssureMQTTService, MqttService>();
 builder.Services.AddSingleton<IRawDataService, RawDataService>();
@@ -23,6 +31,8 @@ builder.Services.AddSingleton<IRawDataService, RawDataService>();
 //MqttService is above
 builder.Services.AddSingleton<IPythonMQTTService, MQTTServiceLocalPython>();
 
+
+builder.Services.AddControllers();
 
 
 var app = builder.Build();

@@ -1,0 +1,8 @@
+﻿namespace Cssure.MongoDB
+{
+    public class EcgDataDb
+    {
+        public string ConnectionString { get; set; }  
+        public string DatabaseName { get; set; }
+    }
+}
