@@ -1,49 +1,9 @@
 {
   "profiles": {
-    "CssureLaura": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "dotnetRunMessages": true,
-      "applicationUrl": "https://192.168.0.5:7064;http://192.168.0.5:5266"
-    },
+
     "Cssure": {
       "commandName": "Project",
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7064;http://localhost:5266"
-    },
-    "CssureEmma": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "dotnetRunMessages": true,
-      "applicationUrl": "https://172.20.10.2:7064;http://172.20.10.2:5266"
-    },
-    "CssureMadsMobil": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "dotnetRunMessages": true,
-      "applicationUrl": "https://192.168.0.4:7064;http://192.168.0.4:5266"
-    },
-    "CssureVVBar": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

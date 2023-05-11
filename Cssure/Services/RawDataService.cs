@@ -1,6 +1,8 @@
 ﻿using Cssure.Constants;
 using Cssure.DTO;
 using Cssure.Models;
+using Cssure.MongoDB.Services;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -13,6 +15,9 @@ namespace Cssure.Services
     {
 
         private readonly IMQTTService mqttService;
+        private readonly DecodedECGDataService decodedService;
+        private readonly RawECGDataService rawService;
+
 
         // Buffering
         private int nBufferSamples = 252 * 60 * 3; //45000 samples, 3750 batches
@@ -26,13 +31,19 @@ namespace Cssure.Services
 
         };
 
-        public RawDataService(IPythonMQTTService MQTTManager)
+        public RawDataService(IPythonMQTTService MQTTManager, DecodedECGDataService decodedService, RawECGDataService rawService)
         {
             mqttService = MQTTManager;
+            this.decodedService = decodedService;
+            this.rawService = rawService;
         }
 
-        public void ProcessData(EKGSampleDTO eKGSample)
+        public async void ProcessData(EKGSampleDTO eKGSample)
         {
+            //Save raw data in database
+            await rawService.postRaw(eKGSample);
+            // Decode bytes
+ 
             try
             {
 
@@ -41,8 +52,11 @@ namespace Cssure.Services
                 ecgdata.PatientID = eKGSample.PatientId;
                 ecgdata.TimeStamp = eKGSample.Timestamp;
 
-                // Buffer data for 3 minutes
-                BufferData(ecgdata);
+            //Save decoded data in database
+            await decodedService.postDecoded(ecgdata);
+
+            // Buffer data for 3 minutes
+            BufferData(ecgdata);
 
                 if (bufferedECG.Samples % 252 == 0)
                 {

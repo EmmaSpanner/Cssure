@@ -1,5 +1,6 @@
 ﻿using Cssure.Constants;
 using Cssure.DTO;
+using Cssure.MongoDB.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Runtime.Serialization;
@@ -14,14 +15,16 @@ namespace Cssure.Services
     {
         private readonly string clientId;
         private readonly MqttClient client;
+        private ProcessedECGDataService processedDataService;
         public MqttClient Client => client;
 
         const byte QOS = MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE; //Defalut = QoS1
 
-        public MQTTServiceLocalPython(IIpAdresses ipAdresses)
+        public MQTTServiceLocalPython(IIpAdresses ipAdresses, ProcessedECGDataService processedDataService)
         {
             var tempUrl = ipAdresses.getIP();
             var url = tempUrl.Split("//")[1].Split(":")[0];
+            this.processedDataService = processedDataService;
 
             client = new MqttClient("assure.au-dev.dk");
             clientId = Guid.NewGuid().ToString();
@@ -82,11 +85,14 @@ namespace Cssure.Services
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void MQTTMessageReceivedCSIdata(object sender, MqttMsgPublishEventArgs e)
+        private async void MQTTMessageReceivedCSIdata(object sender, MqttMsgPublishEventArgs e)
         {
             string topic = e.Topic;
             try
             {
+                
+
+               
                 if (topic == Topics.Topic_Status_Python)
                 {
                     Debug.WriteLine(e.Message.ToString());
@@ -94,8 +100,10 @@ namespace Cssure.Services
                 else if (topic == Topics.Topic_Series_Filtred)
                 {
 
+               
                     var message = System.Text.Encoding.UTF8.GetString(e.Message);
                     CSI_DTO csi = JsonSerializer.Deserialize<CSI_DTO>(message)!;
+                    await processedDataService.postCSI(csi);
                     Debug.WriteLine($"Message received from <<{topic}>>:");
                     Debug.WriteLine($"Vital parametres: " +
                         $"\n \t PatientID: {csi.PatientID}" +

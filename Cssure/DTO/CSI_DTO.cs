@@ -1,7 +1,10 @@
-﻿namespace Cssure.DTO
+﻿using MongoDB.Bson;
+
+namespace Cssure.DTO
 {
     public class CSI_DTO
     {
+        public ObjectId _id { get; set; }
         public string PatientID { get; set; }
         public long TimeStamp { get; set; }
         public float TimeProcess_s { get; set; }
