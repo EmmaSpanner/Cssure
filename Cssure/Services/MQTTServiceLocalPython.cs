@@ -20,10 +20,9 @@ namespace Cssure.Services
 
         const byte QOS = MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE; //Defalut = QoS1
 
-        public MQTTServiceLocalPython(IIpAdresses ipAdresses, ProcessedECGDataService processedDataService)
+        public MQTTServiceLocalPython(ProcessedECGDataService processedDataService)
         {
-            var tempUrl = ipAdresses.getIP();
-            var url = tempUrl.Split("//")[1].Split(":")[0];
+           
             this.processedDataService = processedDataService;
 
             client = new MqttClient("assure.au-dev.dk");

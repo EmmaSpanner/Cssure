@@ -16,13 +16,11 @@
         private IRawDataService rawDataService;
         private ProcessedECGDataService service;
         public MqttClient Client => client;
-        public MqttService(IIpAdresses ipAdresses, IRawDataService rawDataService, ProcessedECGDataService service)
+        public MqttService(IRawDataService rawDataService, ProcessedECGDataService service)
         {
             this.rawDataService = rawDataService;
             this.service = service;
 
-            var tempUrl = ipAdresses.getIP();
-            var url = tempUrl.Split("//")[1].Split(":")[0];
 
             client = new MqttClient("assure.au-dev.dk");
             clientId = Guid.NewGuid().ToString();

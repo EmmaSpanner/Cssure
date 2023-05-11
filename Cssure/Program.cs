@@ -10,16 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+//builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddEndpointsApiExplorer();
+//builder.Services.AddSwaggerGen();
 builder.Services.Configure<EcgDataDb>(builder.Configuration.GetSection(nameof(EcgDataDb)));
 
-
-var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";").Last();
-
-builder.Services.AddSingleton <IIpAdresses>(new IpAdresses(url));
 builder.Services.AddSingleton<MongoService>();
 builder.Services.AddSingleton<ProcessedECGDataService>();
 builder.Services.AddSingleton<RawECGDataService>();
