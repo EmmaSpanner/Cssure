@@ -16,10 +16,10 @@ namespace Cssure.MongoDB.Services
             //_client = new MongoClient("mongodb+srv://Temo:<Temo123>@cluster0.afmwg1g.mongodb.net/?retryWrites=true&w=majority");
 
             //Todo: Db interaktion
-            //_client = new MongoClient("mongodb+srv://Temo:Emmaspanner@cluster0.afmwg1g.mongodb.net/?authSource=admin");
+            _client = new MongoClient("mongodb+srv://Temo:Emmaspanner@cluster0.afmwg1g.mongodb.net/?authSource=admin");
             //_client = new MongoClient("mongodb://Temo:Temo123@localhost:1883");
             //Todo: Db interaktion
-            //var db = _client.GetDatabase("EcgDataDb");
+            var db = _client.GetDatabase("EcgDataDb");
 
         }
 

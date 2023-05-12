@@ -18,11 +18,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 //Todo: Db interaktion
-//builder.Services.Configure<EcgDataDb>(builder.Configuration.GetSection(nameof(EcgDataDb)));
-//builder.Services.AddSingleton<MongoService>();
-//builder.Services.AddSingleton<ProcessedECGDataService>();
-//builder.Services.AddSingleton<RawECGDataService>();
-//builder.Services.AddSingleton<DecodedECGDataService>();
+builder.Services.Configure<EcgDataDb>(builder.Configuration.GetSection(nameof(EcgDataDb)));
+builder.Services.AddSingleton<MongoService>();
+builder.Services.AddSingleton<ProcessedECGDataService>();
+builder.Services.AddSingleton<RawECGDataService>();
+builder.Services.AddSingleton<DecodedECGDataService>();
 
 
 //MQTT service

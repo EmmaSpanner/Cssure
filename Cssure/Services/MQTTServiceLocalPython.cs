@@ -21,16 +21,16 @@ namespace Cssure.Services
 
         const byte QOS = MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE; //Defalut = QoS1
 
-        //Todo: Db interaktion
-        //public MQTTServiceLocalPython(ProcessedECGDataService processedDataService)
 
 
         public UserList UserList { get; }
+        //Todo: Db interaktion-
+        public MQTTServiceLocalPython(ProcessedECGDataService processedDataService,UserList userList)
 
-        public MQTTServiceLocalPython(UserList userList)
+        //public MQTTServiceLocalPython(UserList userList)
         {
             //Todo: Db interaktion
-            //this.processedDataService = processedDataService;
+            this.processedDataService = processedDataService;
             UserList = userList;
             string host = "assure.au-dev.dk";
             //host = "localhost";
@@ -126,7 +126,7 @@ namespace Cssure.Services
 
 
                     //Todo: Db interaktion
-                    //await processedDataService.postCSI(csi);
+                    await processedDataService.postCSI(csi);
 
 
                     Debug.WriteLine($"Message received from <<{topic}>>:");

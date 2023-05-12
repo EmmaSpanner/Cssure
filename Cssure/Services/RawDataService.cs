@@ -32,22 +32,22 @@ namespace Cssure.Services
 
         };
 
-        //public RawDataService(IPythonMQTTService MQTTManager, DecodedECGDataService decodedService, RawECGDataService rawService)
+        public RawDataService(IPythonMQTTService MQTTManager, DecodedECGDataService decodedService, RawECGDataService rawService, UserList userList)
         //Todo: Db interaktion
-        public RawDataService(IPythonMQTTService MQTTManager, UserList userList)
+        //public RawDataService(IPythonMQTTService MQTTManager, UserList userList)
         {
             mqttService = MQTTManager;
             UserList = userList;
             //Todo: Db interaktion
-            //this.decodedService = decodedService;
-            //this.rawService = rawService;
+            this.decodedService = decodedService;
+            this.rawService = rawService;
         }
 
         public async void ProcessData(EKGSampleDTO eKGSample)
         {
             //Save raw data in database
             //Todo: Db interaktion
-            //await rawService.postRaw(eKGSample);
+            await rawService.postRaw(eKGSample);
 
 
             // Decode bytes
@@ -62,7 +62,7 @@ namespace Cssure.Services
 
                 //Save decoded data in database
                 //Todo: Db interaktion
-                //await decodedService.postDecoded(ecgdata);
+                await decodedService.postDecoded(ecgdata);
 
                 // Buffer data for 3 minutes
                 BufferData(ecgdata);
