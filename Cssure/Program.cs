@@ -1,4 +1,5 @@
 using Cssure;
+using Cssure.AlarmSenders;
 using Cssure.Constants;
 using Cssure.Models;
 using Cssure.MongoDB;
@@ -17,6 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddSwaggerGen();
 
 
+builder.Services.AddTransient<IEmailSender, EmailAlarmService>();
 //Todo: Db interaktion
 builder.Services.Configure<EcgDataDb>(builder.Configuration.GetSection(nameof(EcgDataDb)));
 builder.Services.AddSingleton<MongoService>();

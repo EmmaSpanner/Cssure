@@ -1,5 +1,6 @@
 ﻿namespace Cssure.Services
 {
+    using Cssure.AlarmSenders;
     using Cssure.Constants;
     using Cssure.DTO;
     using Cssure.Models;
@@ -15,7 +16,12 @@
         private readonly MqttClient client;
         private readonly string clientId;
         private IRawDataService rawDataService;
+
         public MqttClient Client => client;
+        public MqttService(IRawDataService rawDataService)
+        {
+            this.rawDataService = rawDataService;
+        }
 
         public UserList UserList { get; }
 
