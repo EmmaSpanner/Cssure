@@ -123,7 +123,6 @@
         //This code runs when the client has subscribed to a topic
         async void client_MqttMsqSubsribed(object senser, MqttMsgSubscribedEventArgs e)
         {
-            await alarmService.SendEmailAsync("emmaspanner1997@gmail.com", "Test", "Test hopefully succeeded");
             Console.WriteLine("Subscribed to topic: " + e.MessageId);
         }
     }
