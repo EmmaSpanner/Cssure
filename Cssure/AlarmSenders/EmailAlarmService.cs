@@ -8,6 +8,7 @@ namespace Cssure.AlarmSenders
         public Task SendEmailAsync(string[] email, string subject, string message)
         {
             var mail = "TemoTestMail@gmail.com";
+            //var pw = "!Temo123";
             var pw = "vkjrlfpkwkzhubaf";
 
             var client = new SmtpClient("smtp.gmail.com", 587)
