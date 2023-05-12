@@ -11,6 +11,11 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Cssure.Services
 {
+    public interface IRawDataService
+    {
+        void ProcessData(EKGSampleDTO bytes);
+    }
+
     public class RawDataService : IRawDataService
     {
 
@@ -46,8 +51,8 @@ namespace Cssure.Services
         public async void ProcessData(EKGSampleDTO eKGSample)
         {
             //Save raw data in database
-            //Todo: Db interaktion
-            await rawService.postRaw(eKGSample);
+            //Todo: Db interaktion postRaw
+            //await rawService.postRaw(eKGSample);
 
 
             // Decode bytes
@@ -61,8 +66,8 @@ namespace Cssure.Services
                 ecgdata.TimeStamp = eKGSample.Timestamp;
 
                 //Save decoded data in database
-                //Todo: Db interaktion
-                await decodedService.postDecoded(ecgdata);
+                //Todo: Db interaktion postDecoded
+                //await decodedService.postDecoded(ecgdata);
 
                 // Buffer data for 3 minutes
                 BufferData(ecgdata);
