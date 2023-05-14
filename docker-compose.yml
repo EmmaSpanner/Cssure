@@ -2,14 +2,14 @@ version: '3.4'
 
 services:
   cssure:
-      image: memilnie/cssure:v1.1dev
-      container_name: cssure.dotnet
+      image: memilnie/cssure:latest
+      container_name: cssure_dotnet
 
       restart: unless-stopped
 
   python:
-      image: memilnie/csi_calculator:v2.2Dev
+      image: memilnie/csi_calculator:latest
       network_mode: bridge
-      container_name: cssure.python
+      container_name: cssure_python
 
       restart: unless-stopped

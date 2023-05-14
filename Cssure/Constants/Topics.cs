@@ -4,7 +4,8 @@ namespace Cssure.Constants
 {
     public static class Topics
     {
-        private const string pre = "Dev/";
+        private const string pre = "";
+        //private const string pre = "Dev/";
         public const string
             Topic_Result = pre+"ECG/Result/#",
             Topic_Result_CSI = pre+"ECG/Result/CSI",
