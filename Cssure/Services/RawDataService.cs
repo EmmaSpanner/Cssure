@@ -2,6 +2,7 @@
 using Cssure.DTO;
 using Cssure.Models;
 using Cssure.MongoDB.Services;
+using MongoDB.Driver.Core.WireProtocol.Messages;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
@@ -46,23 +47,23 @@ namespace Cssure.Services
         public async void ProcessData(EKGSampleDTO eKGSample)
         {
             //Save raw data in database
-            //Todo: Db interaktion
-            await rawService.postRaw(eKGSample);
+            //Todo: Db interaktion POST RAW
+            //await rawService.postRaw(eKGSample);
 
 
             // Decode bytes
 
             try
             {
-
+                var t1 = DateTime.Now.ToUniversalTime();
                 // Decode bytes
                 ECGBatchData ecgdata = DecodingBytes.DecodingByteArray.DecodeBytes(eKGSample.RawBytes);
                 ecgdata.PatientID = eKGSample.PatientId;
                 ecgdata.TimeStamp = eKGSample.Timestamp;
 
                 //Save decoded data in database
-                //Todo: Db interaktion
-                await decodedService.postDecoded(ecgdata);
+                //Todo: Db interaktion POST ECG
+                //await decodedService.postDecoded(ecgdata);
 
                 // Buffer data for 3 minutes
                 BufferData(ecgdata);
@@ -99,6 +100,9 @@ namespace Cssure.Services
                     var options = new JsonSerializerOptions { WriteIndented = true };
                     var serialData = JsonSerializer.Serialize<ECGBatchSeriesDataDTO>(dataDTO, options);
                     var bytess = System.Text.Encoding.UTF8.GetBytes(serialData);
+                    var t2 = DateTime.Now.ToUniversalTime();
+                    var timedifferent = t2 - t1;
+                    Debug.WriteLine(timedifferent);
                     mqttService.Publish_RawData(Topics.Topic_Series_Raw, bytess);
                 }
             }
@@ -166,11 +170,11 @@ namespace Cssure.Services
             if (nCurrentSamples >= nBufferSamples)
             {
                 // Remove first batch from buffer (FIFO)
-                bufferedECG.ECGChannel1.RemoveAt(0);
-                bufferedECG.ECGChannel2.RemoveAt(0);
-                bufferedECG.ECGChannel3.RemoveAt(0);
-                bufferedECG.TimeStamp.RemoveAt(0);
-                bufferedECG.Samples -= 12;
+                bufferedECG.ECGChannel1.RemoveRange(0,21);
+                bufferedECG.ECGChannel2.RemoveRange(0, 21);
+                bufferedECG.ECGChannel3.RemoveRange(0, 21);
+                bufferedECG.TimeStamp.RemoveRange(0, 21);
+                bufferedECG.Samples -= 12*21;
             }
 
 

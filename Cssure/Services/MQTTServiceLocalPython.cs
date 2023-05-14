@@ -24,7 +24,7 @@ namespace Cssure.Services
 
 
         public UserList UserList { get; }
-        //Todo: Db interaktion-
+        //Todo: Db interaktion
         public MQTTServiceLocalPython(ProcessedECGDataService processedDataService,UserList userList)
 
         //public MQTTServiceLocalPython(UserList userList)
@@ -125,8 +125,8 @@ namespace Cssure.Services
                     }
 
 
-                    //Todo: Db interaktion
-                    await processedDataService.postCSI(csi);
+                    //Todo: Db interaktion POST CSI
+                    //await processedDataService.postCSI(csi);
 
 
                     Debug.WriteLine($"Message received from <<{topic}>>:");

@@ -125,18 +125,16 @@ import os
 #region Step 0: Setup the MQTT client
 
 #region Topics
-Topic_Status = "ECG/Status/#";
-Topic_Status_CSSURE = "ECG/Status/CSSURE";
-Topic_Status_Python = "ECG/Status/Python";
-Topic_Status_Python_Disconnect = "ECG/Status/Python/Disconnect";
 
-Topic_Series_Raw = "ECG/Series/CSSURE2PYTHON";
-Topic_Series_Filtred = "ECG/Series/PYTHON2CSSURE";
+pre = "Dev/"
+Topic_Status = pre+"ECG/Status/#";
+Topic_Status_CSSURE = pre+"ECG/Status/CSSURE";
+Topic_Status_Python = pre+"ECG/Status/Python";
+Topic_Status_Python_Disconnect = pre+"ECG/Status/Python/Disconnect";
 
-Topic_Result = "ECG/Result/#";
-Topic_Result_CSI = "ECG/Result/CSI";
-Topic_Result_ModCSI = "ECG/Result/ModCSI";
-Topic_Reuslt_RR = "ECG/Result/RR-Peak";
+Topic_Series_Raw = pre+"ECG/Series/CSSURE2PYTHON";
+Topic_Series_Filtred = pre+"ECG/Series/PYTHON2CSSURE";
+
 #endregion
 
 
@@ -219,21 +217,62 @@ def RearangeData(ecgdata):
     #So every channel needs to be fatteend out to a 1D array
     # and the timestamps needs to be extracted to create a same length array for the timestamps
     
-    ch1 = np.asarray(ecgdata['ECGChannel1'])
-    ch1 = ch1.reshape(-1)
-    ch2 = np.asarray(ecgdata['ECGChannel2'])
-    ch2 = ch2.reshape(-1)
-    ch3 = np.asarray(ecgdata['ECGChannel3'])
-    ch3 = ch3.reshape(-1)
+
     
-    # add the timestampmock to each channel as a new row
-    timestamp_mock = np.zeros(len(ch1))
-    ch1 = np.c_[timestamp_mock,ch1]
-    timestamp_mock = np.zeros(len(ch2))
-    ch2 = np.c_[timestamp_mock,ch2]
-    timestamp_mock = np.zeros(len(ch3))
-    ch3 = np.c_[timestamp_mock,ch3]
+    rawdata = (ecgdata['ECGChannel1'])
     
+    rawdata = [x for x in rawdata if x is not None]
+    rawdatalist = list()
+    for batch in rawdata : 
+        if (len(batch) < 12):
+            continue
+        for sample in batch : 
+            rawdatalist.append(sample) 
+   
+    rawdata = np.array(rawdatalist)
+  
+    timestamp_mock = np.zeros(len(rawdata))
+    rawdata = np.c_[timestamp_mock,rawdata]
+    
+    ch1 = rawdata
+    
+    
+    
+    rawdata = (ecgdata['ECGChannel2'])
+    
+    rawdata = [x for x in rawdata if x is not None]
+    rawdatalist = list()
+    for batch in rawdata : 
+        if (len(batch) < 12):
+            continue
+        for sample in batch : 
+            rawdatalist.append(sample) 
+   
+    rawdata = np.array(rawdatalist)
+  
+    timestamp_mock = np.zeros(len(rawdata))
+    rawdata = np.c_[timestamp_mock,rawdata]
+    
+    ch2 = rawdata
+    
+    
+    rawdata = (ecgdata['ECGChannel3'])
+    
+    rawdata = [x for x in rawdata if x is not None]
+    rawdatalist = list()
+    for batch in rawdata : 
+        if (len(batch) < 12):
+            continue
+        for sample in batch : 
+            rawdatalist.append(sample) 
+   
+    rawdata = np.array(rawdatalist)
+  
+    timestamp_mock = np.zeros(len(rawdata))
+    rawdata = np.c_[timestamp_mock,rawdata]
+    
+    ch3 = rawdata
+   
     return ch1, ch2, ch3
 
 #endregion
@@ -350,25 +389,26 @@ def DecissionSupport(CSINormMax,ModCSINormMax,ch):
     ModCSI100 will be 1.80 times over the normal value 
     """
     alarm = dict()
-    if ch["CSI30"] / CSINormMax[0] > 1.65:
-        alarm["CSI30_Alarm"] = 1 #"Seizure"
+    multipleRR = (ch["len_rr"]>4)
+    if multipleRR and (ch["CSI30"] / CSINormMax[0]) > 1.65:
+        alarm["CSI30_Alarm"] = True #"Seizure"
     else:
-        alarm["CSI30_Alarm"] = 0 #"No seizure"
+        alarm["CSI30_Alarm"] = False #"No seizure"
     
-    if ch["CSI50"] / CSINormMax[1] > 2.15:
-        alarm["CSI50_Alarm"] = 1 #"Seizure"
+    if multipleRR and (ch["CSI50"] / CSINormMax[1]) > 2.15:
+        alarm["CSI50_Alarm"] = True #"Seizure"
     else:
-        alarm["CSI50_Alarm"] = 0 #"No seizure"
+        alarm["CSI50_Alarm"] = False #"No seizure"
         
-    if ch["CSI100"] / CSINormMax[2] > 1.57:
-        alarm["CSI100_Alarm"] = 1 #"Seizure"
+    if multipleRR and (ch["CSI100"] / CSINormMax[2]) > 1.57:
+        alarm["CSI100_Alarm"] = True #"Seizure"
     else:
-        alarm["CSI100_Alarm"] = 0 #"No seizure"
+        alarm["CSI100_Alarm"] = False #"No seizure"
     
-    if ch["ModCSI100"] / ModCSINormMax[2] > 1.80:
-        alarm["ModCSI100_Alarm"] = 1 #"Seizure"
+    if multipleRR and (ch["ModCSI100"] / ModCSINormMax[2]) > 1.80:
+        alarm["ModCSI100_Alarm"] = True #"Seizure"
     else:
-        alarm["ModCSI100_Alarm"] = 0 #"No seizure"
+        alarm["ModCSI100_Alarm"] = False #"No seizure"
         
     return alarm
     
@@ -394,7 +434,7 @@ def RearangeDataBack(ecgObject, Findings_ch1, Findings_ch2, Findings_ch3, timeDi
 #region Step 6: Publish the data
 def EncodeJson(dict):
     
-    json_object = json.dumps(dict, indent = 5) 
+    json_object = json.dumps(dict, indent = 3, allow_nan = True, default = str).encode('utf8')
     return json_object
 
 def PublishData(json_object):
@@ -407,6 +447,7 @@ def PublishData(json_object):
 #region Call the functions
 def ProcessingAlgorihtm(message):
     try:
+        t1 = datetime.datetime.now().timestamp()
         ecgObject = DeserializeJson(message)
         ch1, ch2, ch3 = RearangeData(ecgObject)
         timeDifferent = TimeDiffer(ecgObject)
@@ -417,14 +458,18 @@ def ProcessingAlgorihtm(message):
             Findings_ch2 = CalcParametres(ch2)
             Findings_ch3 = CalcParametres(ch3)
             
+            
             Alarm = DecissionSupport(ecgObject['CSINormMax'],ecgObject['ModCSINormMax'],Findings_ch1)
             
-            
+            t2 = datetime.datetime.now().timestamp()
+            timeDifferent = t2-t1
             allParametres = RearangeDataBack(ecgObject,Findings_ch1, Findings_ch2, Findings_ch3, timeDifferent,Alarm)
             json_object = EncodeJson(allParametres)
             PublishData(json_object)
     except Exception as e:
-        client.publish(Topic_Series_Filtred, "An error occured in the processing algorithm." + "\n" +e, qos=1, retain=True)
+        errorMsg  = "An error occured in the processing algorithm." + "\n" +str(e)
+        encoded = errorMsg.encode('utf8')
+        client.publish(Topic_Series_Filtred,encoded , qos=1, retain=True)
         print(
         "An error occured in the processing algorithm. \n"
         )
@@ -450,12 +495,12 @@ client.on_subscribe = on_subscribe
 
 # Create the last will message
 client.will_set(Topic_Status_Python, payload="Offline", qos=0, retain=True)
-# client.username_pw_set(username="s1",password="passwordfors1")
-
+client.username_pw_set(username="s1",password="passwordfors1")
+broker_address= "localhost"
 broker_address= "assure.au-dev.dk"
 print("Connecting to MQTT broker... \n with host: " + broker_address)
 try:
-    client.username_pw_set(username="s1",password="passwordfors1")
+    # client.username_pw_set(username="s1",password="passwordfors1")
     client.connect(host=broker_address, port=1883, keepalive=120)
     
 except ConnectionRefusedError as e:
