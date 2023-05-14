@@ -1,4 +1,5 @@
-﻿using Cssure.Constants;
+﻿using Cssure.AlarmSenders;
+using Cssure.Constants;
 using Cssure.DTO;
 using Cssure.Models;
 using Cssure.MongoDB.Services;
@@ -17,18 +18,21 @@ namespace Cssure.Services
         private readonly string clientId;
         private readonly MqttClient client;
         private ProcessedECGDataService processedDataService;
+        private IEmailSender alarmService;
+
+        public bool shouldAlarm = true;
+
         public MqttClient Client => client;
 
         const byte QOS = MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE; //Defalut = QoS1
 
-
-
         public UserList UserList { get; }
         //Todo: Db interaktion
-        public MQTTServiceLocalPython(ProcessedECGDataService processedDataService,UserList userList)
+        public MQTTServiceLocalPython(ProcessedECGDataService processedDataService,UserList userList, IEmailSender alarmService)
 
         //public MQTTServiceLocalPython(UserList userList)
         {
+            this.alarmService = alarmService;
             //Todo: Db interaktion
             this.processedDataService = processedDataService;
             UserList = userList;
@@ -86,6 +90,7 @@ namespace Cssure.Services
             }
             return false;
         }
+ 
 
         /// <summary>
         /// Her for vi alle beskeder tilbage
@@ -110,14 +115,34 @@ namespace Cssure.Services
                     //var message = System.Text.Encoding.UTF8.GetString(e.Message);
                     CSI_DTO csi = JsonSerializer.Deserialize<CSI_DTO>(message)!;
 
+                    csi.Alarm.CSI30_Alarm = true;
                     if (csi.Alarm.CSI30_Alarm || csi.Alarm.CSI50_Alarm || csi.Alarm.CSI100_Alarm || csi.Alarm.ModCSI100_Alarm)
                     {
+                        //If user has added patientId and it has been 5 minutes since the last alarm an email should be sent.
                         if (UserList.Users.ContainsKey(csi.PatientID))
                         {
                             IUserMetadata user = UserList.Users[csi.PatientID];
                             string[] userEmails = user.GetCaregiversEmail();
+                            if(user.GetAlarmExpirey() == null)
+                            {
+                                user.SetAlarmExpirey(DateTime.Now);
+                            }
+
+                            if(DateTime.Now > user.GetAlarmExpirey())
+                            {
+                                user.SetAlarmExpirey(DateTime.Now.AddMinutes(1));
+                                try
+                                {
+                                    await alarmService.SendEmailAsync(userEmails, "ALARM", "Alarm! A seizure occured at " + DateTimeOffset.FromUnixTimeMilliseconds(csi.TimeStamp).LocalDateTime);
+                                } catch (Exception ex)
+                                {
+                                    Debug.WriteLine("Exception occured when trying to send alarm email: " + ex.ToString());
+                                }
+                               
+                            }
+
+
                         }
-                        //Todo: Sent Email here
                     }
                     else
                     {

@@ -21,6 +21,7 @@ namespace Cssure.Models
         private  string[] email;
         private  float[] maxcsi;
         private  float[] maxmodcsi;
+        private DateTime alarmExpirey;
 
         public UsersMetadata(string Name, int UserId, string[] email, float[] maxcsi, float[] maxmodcsi)
         {
@@ -34,6 +35,16 @@ namespace Cssure.Models
         public string[] GetCaregiversEmail()
         {
             return email;
+        }
+
+        public DateTime GetAlarmExpirey()
+        {
+            return alarmExpirey;
+        }
+
+        public void SetAlarmExpirey(DateTime _alarmExpirey)
+        {
+            alarmExpirey = _alarmExpirey;
         }
 
         public float[] GetMaxNormalCsi()
