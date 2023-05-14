@@ -115,7 +115,8 @@ namespace Cssure.Services
                     //var message = System.Text.Encoding.UTF8.GetString(e.Message);
                     CSI_DTO csi = JsonSerializer.Deserialize<CSI_DTO>(message)!;
 
-                    csi.Alarm.CSI30_Alarm = true;
+                    //todo: Force email
+                    //csi.Alarm.CSI30_Alarm = true;
                     if (csi.Alarm.CSI30_Alarm || csi.Alarm.CSI50_Alarm || csi.Alarm.CSI100_Alarm || csi.Alarm.ModCSI100_Alarm)
                     {
                         //If user has added patientId and it has been 5 minutes since the last alarm an email should be sent.
