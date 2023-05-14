@@ -2,6 +2,7 @@
 {
     public interface IUserMetadata
     {
+        public ECGBatchSeriesData BufferedECG { get; set; }
         public string GetName();
         public int GetUserID();
         public string[] GetCaregiversEmail();

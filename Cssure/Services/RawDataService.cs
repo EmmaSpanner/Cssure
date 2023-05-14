@@ -65,23 +65,24 @@ namespace Cssure.Services
                 ECGBatchData ecgdata = DecodingBytes.DecodingByteArray.DecodeBytes(eKGSample.RawBytes);
                 ecgdata.PatientID = eKGSample.PatientId;
                 ecgdata.TimeStamp = eKGSample.Timestamp;
+                IUserMetadata user = UserList.Users[ecgdata.PatientID];
+                ECGBatchSeriesData buffer = user.BufferedECG;
 
                 //Save decoded data in database
                 //Todo: Db interaktion postDecoded
                 //await decodedService.postDecoded(ecgdata);
 
                 // Buffer data for 3 minutes
-                BufferData(ecgdata);
+                BufferData(ecgdata, buffer);
 
-                if (bufferedECG.Samples % 252 == 0)
+                if (buffer.Samples % 252 == 0)
                 {
                     float[] CSINormMaxtemp;
                     float[] ModCSINormMaxtemp;
                     if (UserList.Users.ContainsKey(ecgdata.PatientID))
                     {
-                        IUserMetadata temp = UserList.Users[ecgdata.PatientID];
-                        CSINormMaxtemp = temp.GetMaxNormalCsi();
-                        ModCSINormMaxtemp = temp.GetMaxNormalModCsi();
+                        CSINormMaxtemp = user.GetMaxNormalCsi();
+                        ModCSINormMaxtemp = user.GetMaxNormalModCsi();
                     }
                     else
                     {
@@ -91,12 +92,12 @@ namespace Cssure.Services
                     }
                     ECGBatchSeriesDataDTO dataDTO = new ECGBatchSeriesDataDTO()
                     {
-                        ECGChannel1 = bufferedECG.ECGChannel1.ToArray(),
-                        ECGChannel2 = bufferedECG.ECGChannel2.ToArray(),
-                        ECGChannel3 = bufferedECG.ECGChannel3.ToArray(),
-                        TimeStamp = bufferedECG.TimeStamp.ToArray(),
-                        Samples = bufferedECG.Samples,
-                        PatientID = bufferedECG.PatientID,
+                        ECGChannel1 = buffer.ECGChannel1.ToArray(),
+                        ECGChannel2 = buffer.ECGChannel2.ToArray(),
+                        ECGChannel3 = buffer.ECGChannel3.ToArray(),
+                        TimeStamp = buffer.TimeStamp.ToArray(),
+                        Samples = buffer.Samples,
+                        PatientID = buffer.PatientID,
                         CSINormMax = CSINormMaxtemp,
                         ModCSINormMax = ModCSINormMaxtemp
                     };
@@ -118,13 +119,13 @@ namespace Cssure.Services
 
         }
 
-        private void BufferData(ECGBatchData ecgData)
+        private void BufferData(ECGBatchData ecgData, ECGBatchSeriesData buffer)
         {
             int nCurrentSamples = bufferedECG.Samples;
             //TODO: dynamic length of data
 
             // Add new batch to buffer
-            bufferedECG.ECGChannel1.Add(new int[] {
+            buffer.ECGChannel1.Add(new int[] {
                 ecgData.ECGChannel1[0],
                 ecgData.ECGChannel1[1],
                 ecgData.ECGChannel1[2],
@@ -137,7 +138,7 @@ namespace Cssure.Services
                 ecgData.ECGChannel1[9],
                 ecgData.ECGChannel1[10],
                 ecgData.ECGChannel1[11] });
-            bufferedECG.ECGChannel2.Add(new int[] {
+            buffer.ECGChannel2.Add(new int[] {
                 ecgData.ECGChannel2[0],
                 ecgData.ECGChannel2[1],
                 ecgData.ECGChannel2[2],
@@ -150,7 +151,7 @@ namespace Cssure.Services
                 ecgData.ECGChannel2[9],
                 ecgData.ECGChannel2[10],
                 ecgData.ECGChannel2[11] });
-            bufferedECG.ECGChannel3.Add(new int[] {
+            buffer.ECGChannel3.Add(new int[] {
                 ecgData.ECGChannel3[0],
                 ecgData.ECGChannel3[1],
                 ecgData.ECGChannel3[2],
@@ -167,19 +168,19 @@ namespace Cssure.Services
             //bufferedECG.ECGChannel2.Add(ecgData.ECGChannel2);
             //bufferedECG.ECGChannel3.Add(ecgData.ECGChannel3);
             long time = ecgData.TimeStamp.ToUnixTimeMilliseconds();
-            bufferedECG.TimeStamp.Add(time);
-            bufferedECG.Samples += 12;
-            bufferedECG.PatientID = ecgData.PatientID;
+            buffer.TimeStamp.Add(time);
+            buffer.Samples += 12;
+            buffer.PatientID = ecgData.PatientID;
 
             //When buffer is full, remove first batch
             if (nCurrentSamples >= nBufferSamples)
             {
                 // Remove first batch from buffer (FIFO)
-                bufferedECG.ECGChannel1.RemoveRange(0,21);
-                bufferedECG.ECGChannel2.RemoveRange(0, 21);
-                bufferedECG.ECGChannel3.RemoveRange(0, 21);
-                bufferedECG.TimeStamp.RemoveRange(0, 21);
-                bufferedECG.Samples -= 12*21;
+                buffer.ECGChannel1.RemoveRange(0,21);
+                buffer.ECGChannel2.RemoveRange(0, 21);
+                buffer.ECGChannel3.RemoveRange(0, 21);
+                buffer.TimeStamp.RemoveRange(0, 21);
+                buffer.Samples -= 12*21;
             }
 
 

@@ -23,6 +23,23 @@ namespace Cssure.Models
         private  float[] maxmodcsi;
         private DateTime alarmExpirey;
 
+        private ECGBatchSeriesData bufferedECG = new ECGBatchSeriesData()
+        {
+            ECGChannel1 = new List<int[]>(),
+            ECGChannel2 = new List<int[]>(),
+            ECGChannel3 = new List<int[]>(),
+            TimeStamp = new List<long>(),
+            Samples = 0,
+
+        };
+
+
+        public ECGBatchSeriesData BufferedECG
+        {
+            get { return bufferedECG; }
+            set { bufferedECG = value; }
+        }
+
         public UsersMetadata(string Name, int UserId, string[] email, float[] maxcsi, float[] maxmodcsi)
         {
             name = Name;
