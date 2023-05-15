@@ -4,14 +4,16 @@ namespace Cssure.Constants
 {
     public static class Topics
     {
-        private const string pre = "";
-        //private const string pre = "Dev/";
+        //private const string pre = "";
+        private const string pre = "Dev/";
         public const string
 
 
             Topic_Status_CSSUREPY = pre + "ECG/Status/CSSURE-Py",
             Topic_Status_CSSURE = pre + "ECG/Status/CSSURE",
             Topic_Version_CSSURE = pre + "ECG/Version/CSSURE",
+
+            Topic_GetVersion = pre + "ECG/GetVersion",
 
 
             Topic_Status_Python = pre + "ECG/Status/Python",
