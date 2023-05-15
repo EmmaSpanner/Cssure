@@ -61,6 +61,8 @@
                 //Publish("SeizureDetectionSystem", System.Text.Encoding.UTF8.GetBytes("Hej fra Cssure"));
 
                 Client.Publish(Topics.Topic_Status_CSSURE, System.Text.Encoding.UTF8.GetBytes("Online"), MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, retain: true);
+                Client.Publish(Topics.Topic_Version_CSSURE, System.Text.Encoding.UTF8.GetBytes(VersionHistory.No), MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE, retain: true);
+                
                 Client.Subscribe(new string[] { Topics.Topic_Series_FromBSSURE }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
                 Client.Subscribe(new string[] { Topics.Topic_User }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
             }
