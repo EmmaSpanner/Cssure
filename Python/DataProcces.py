@@ -41,8 +41,8 @@ The environment can automaticly be created with anaconda
 To deploy the script in a docker container the following steps is needed:
 1. Install docker from https://www.docker.com/products/docker-desktop
 2. Open a terminal and navigate to the folder where the Dockerfile is located
-3. Build the docker image with the following command: docker build -t dataprocess .
-4. Run the docker image with the following command: docker run -it dataprocess
+3. Build the docker image with the following command: docker build -t csi_calculator .
+4. Run the docker image with the following command: docker run -it csi_calculator
 """
 
 """Explain the code as Pseudocode:

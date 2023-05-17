@@ -86,5 +86,6 @@ Deploy in a docker container:
 		3. Build the docker image with the following command: docker build -t cssure .
 		4. Run the docker image with the following command: docker run -it cssure
 
+	Docker-Compose up, can be runed in the Developer Powershell terminal to launch the to images of cssure and csi_calcultor
 
 Enjoy receiving and processing raw data!
