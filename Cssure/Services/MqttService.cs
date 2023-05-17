@@ -16,11 +16,9 @@
         private readonly MqttClient client;
         private readonly string clientId;
         private IRawDataService rawDataService;
-        private IEmailSender alarmService;
         public MqttClient Client => client;
         public MqttService(IRawDataService rawDataService)
         {
-            this.alarmService = alarmService;
             this.rawDataService = rawDataService;
         }
 
@@ -32,7 +30,6 @@
             UserList = userList;
             client = new MqttClient("assure.au-dev.dk");
             clientId = Guid.NewGuid().ToString();
-            this.alarmService = alarmService;
         }
 
         public void OpenConnection()
