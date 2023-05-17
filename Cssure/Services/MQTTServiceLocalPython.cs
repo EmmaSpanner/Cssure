@@ -59,13 +59,15 @@ namespace Cssure.Services
                     cleanSession: false,
                     keepAlivePeriod: 60,
                     willFlag: true,
-                    willTopic: Topics.Topic_Status_CSSURE + "/py",
+                    willTopic: Topics.Topic_Status_CSSUREPY,
                     willMessage: "Offline",
                     willRetain: true,
                     willQosLevel: QOS
                     );
 
-                Client.Publish(Topics.Topic_Status_CSSURE + "/py", System.Text.Encoding.UTF8.GetBytes("Online"), QOS, retain: true);
+                Client.Publish(Topics.Topic_Status_CSSUREPY, System.Text.Encoding.UTF8.GetBytes("Online"), QOS, retain: true);
+                
+                
                 Client.Subscribe(new string[] { Topics.Topic_Status_Python }, new byte[] { QOS });
                 Client.Subscribe(new string[] { Topics.Topic_Series_Filtred }, new byte[] { QOS });
             }
