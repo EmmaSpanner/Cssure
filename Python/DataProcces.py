@@ -1,23 +1,67 @@
-"""
+""" DataProcces.py
 This script is created to calculate the csi and modified csi parametres from the ecg data
 
+This script is created by the group of master students at from Electrical and Computer Engineering, at Aarhus University 2023
+
+This script can be runned directly from the terminal with the following command: python DataProcces.py
+or can be deployed in a docker container
+
 """
 
-"""Psuedo code:
+""" Run the script locally:
+To run the script an eviroment with the following libraries is needed:
+    - paho-mqtt
+    - numpy
+    - numpy-base
+    - numpydoc
+    - jsonschema
+    - python-fastjsonschema
+    - python-lsp-jsonrpc
+    - ujson
+    - python-dateutil
+    - matplotlib
+    - matplotlib-base
+    - matplotlib-inline
+    - scikit-learn
+    - pip:
+        - hrv-analysis
+        - scipy
+
+The environment can automaticly be created with anaconda
+1. Step is to install anaconda from https://www.anaconda.com/products/individual
+2. Open anaconda prompt (terminal) and navigate to the folder where the env.yml file is located
+3. Create the environment with the following command: conda env create -f env.yml
+4. Activate the environment with the following command: conda activate Temo
+5. Run the script with the following command: python DataProcces.py
+
+
+"""
+
+""" Deploy in a docker container:
+To deploy the script in a docker container the following steps is needed:
+1. Install docker from https://www.docker.com/products/docker-desktop
+2. Open a terminal and navigate to the folder where the Dockerfile is located
+3. Build the docker image with the following command: docker build -t dataprocess .
+4. Run the docker image with the following command: docker run -it dataprocess
+"""
+
+"""Explain the code as Pseudocode:
+The code is divided into 7 steps:
 
 Step 1: Get the data
     Get raw ecg data from the broker
     Data will be provided form the ASP.Net server on the topic "ECG/Series/Raw"
     It will be a json string with the following format, as described further down
 
-Step 2: Rearage the data
+Step 2: Rearrange the data
     It needs to be a continous signal
 
-Step 3: Calculate the parametres 
-    Calculate the essential parametres
-    3.1 First step is to detect the QRS peaks
-    3.2 Then calculate the RR intervals
-    3.3 Then calculate essensial parameters
+Step 3: QRSDetector
+    Detect the QRS peaks   
+
+Step 4: RR-interval + CSI and ModCSI
+    4.1 Then calculate the RR intervals
+    4.2 Then calculate essensial parameters
             CSI:
                 There is calculated 4 types of CSI parametres; CSI (Hole signal lenght), CSI30, CSI50 and CSI100
                 The nummer reffrens to how many RR intervals that is used to calculate the parametres
@@ -25,15 +69,16 @@ Step 3: Calculate the parametres
                 There is calculated 4 types of modified CSI parametres; ModCSI (Hole signal lenght), ModCSI30, ModCSI50 and ModCSI100
             MeanHR: Mean heart rate
 
-Step 4: Decession support
+
+Step 5: Decession support
     The decission support is based on the CSI parametres
     The decission support is based on the modified CSI parametres
 
-Step 5: Rearange the data
-    Rearange the data to ????
+Step 6: Rearrange the data
+    Rearange the data from step 4 and 5
 
-Step 6: Publish the data
-    Publish the data to the broker on the topic "ECG/Series/Filtred"
+Step 7: Publish the data
+    Publish the data to the broker
     It will be a json string with the following format, as described further down
 
 
@@ -56,6 +101,7 @@ The data will be sent every minute (60 s)
 
 
 """
+
 """Incomming data format:
     {
         "PatientID": "1",
@@ -83,6 +129,7 @@ The data will be sent every minute (60 s)
             ]  
     }
 """
+
 """Returning data format (ISH...):
     {
         "PatientID": "1",
@@ -122,18 +169,30 @@ import os
 
 #endregion
 
+#region Versions History
+VersionsHistory = "V1.1 - 2023-05-15 - Initial version"
+VersionsHistory = "V1.2 - 2023-05-15 - With Version control"
+VersionsHistory = "V1.3 - 2023-05-16 - With decention thresholding at 105percent for all CSI parametres"
+#endregion
+
 #region Step 0: Setup the MQTT client
 
 #region Topics
 
 pre = "Dev/"
-Topic_Status = pre+"ECG/Status/#";
-Topic_Status_CSSURE = pre+"ECG/Status/CSSURE";
-Topic_Status_Python = pre+"ECG/Status/Python";
-Topic_Status_Python_Disconnect = pre+"ECG/Status/Python/Disconnect";
+pre = ""
 
-Topic_Series_Raw = pre+"ECG/Series/CSSURE2PYTHON";
-Topic_Series_Filtred = pre+"ECG/Series/PYTHON2CSSURE";
+Topic_GetVersion = pre+"ECG/GetVersion"
+
+Topic_Status = pre+"ECG/Status/#"
+Topic_Status_CSSURE = pre + "ECG/Status/CSSURE"
+Topic_Version_CSSURE = pre + "ECG/Versíon/CSSURE"
+
+Topic_Status_Python = pre+"ECG/Status/Python"
+Topic_Version_Python = pre+"ECG/Version/Python"
+
+Topic_Series_Raw = pre+"ECG/Series/CSSURE2PYTHON"
+Topic_Series_Filtred = pre+"ECG/Series/PYTHON2CSSURE"
 
 #endregion
 
@@ -143,7 +202,10 @@ Topic_Series_Filtred = pre+"ECG/Series/PYTHON2CSSURE";
 def on_connect(client, userdata, flags, rc):
     client.subscribe(Topic_Status)
     client.subscribe(Topic_Series_Raw)
-    client.publish(Topic_Status_Python, "Online", qos=0, retain=True)
+    client.subscribe(Topic_GetVersion)
+    client.publish(Topic_Status_Python, "Online".encode("utf-8"), qos=0, retain=True)
+    client.publish(Topic_Version_Python, VersionsHistory, qos=0, retain=True)
+    
     print("Connected with result code "+str(rc))
 
 # When a message is received, this function is called
@@ -162,6 +224,8 @@ def on_message(client, userdata, msg):
     
     elif msg.topic == Topic_Series_Raw: #Handle the raw data
         ProcessingAlgorihtm(message)
+    elif msg.topic == Topic_GetVersion: #Handle if somebody req a version
+        client.publish(Topic_Version_Python, VersionsHistory, qos=0, retain=True)
     else:
         print("Unknown topic: " + msg.topic+ "\n\t"+str(message))
         
@@ -194,7 +258,7 @@ def DeserializeJson(ms):
 
 #endregion
 
-#region Step 2: Rearage the data
+#region Step 2: Rearrange the data
 
 def RearangeData(ecgdata):
     # incomming data format:
@@ -277,7 +341,7 @@ def RearangeData(ecgdata):
 
 #endregion
 
-#region Step 3: Calculate the parametres
+#region Step 3 + 4: QRSDetector + RR-interval => CSI and ModCSI
 
 def TimeDiffer(ecgObject):
     # Calculate the time it took to get and process the data
@@ -377,7 +441,7 @@ def CalcParametres(data):
 
 #endregion
 
-#region Step 4: Decission support
+#region Step 5: Decission support
 def DecissionSupport(CSINormMax,ModCSINormMax,ch):
     """ Due to the reshearsh of Jesper Jeppesen
     
@@ -390,22 +454,22 @@ def DecissionSupport(CSINormMax,ModCSINormMax,ch):
     """
     alarm = dict()
     multipleRR = (ch["len_rr"]>4)
-    if multipleRR and (ch["CSI30"] / CSINormMax[0]) > 1.65:
+    if multipleRR and (ch["CSI30"] / CSINormMax[0]) > 1.05:#1.65:
         alarm["CSI30_Alarm"] = True #"Seizure"
     else:
         alarm["CSI30_Alarm"] = False #"No seizure"
     
-    if multipleRR and (ch["CSI50"] / CSINormMax[1]) > 2.15:
+    if multipleRR and (ch["CSI50"] / CSINormMax[1]) > 1.05:#2.15:
         alarm["CSI50_Alarm"] = True #"Seizure"
     else:
         alarm["CSI50_Alarm"] = False #"No seizure"
         
-    if multipleRR and (ch["CSI100"] / CSINormMax[2]) > 1.57:
+    if multipleRR and (ch["CSI100"] / CSINormMax[2]) > 1.05:#1.57:
         alarm["CSI100_Alarm"] = True #"Seizure"
     else:
         alarm["CSI100_Alarm"] = False #"No seizure"
     
-    if multipleRR and (ch["ModCSI100"] / ModCSINormMax[2]) > 1.80:
+    if multipleRR and (ch["ModCSI100"] / ModCSINormMax[2]) > 1.05:#1.80:
         alarm["ModCSI100_Alarm"] = True #"Seizure"
     else:
         alarm["ModCSI100_Alarm"] = False #"No seizure"
@@ -414,7 +478,7 @@ def DecissionSupport(CSINormMax,ModCSINormMax,ch):
     
 #endregion
 
-#region Step 5: Rearange the data
+#region Step 6: Rearrange the data
 
 def RearangeDataBack(ecgObject, Findings_ch1, Findings_ch2, Findings_ch3, timeDifferent,Alarm):
     allParametres = dict()
@@ -431,17 +495,17 @@ def RearangeDataBack(ecgObject, Findings_ch1, Findings_ch2, Findings_ch3, timeDi
 
 #endregion
 
-#region Step 6: Publish the data
+#region Step 7: Publish the data
 def EncodeJson(dict):
     
-    json_object = json.dumps(dict, indent = 3, allow_nan = True, default = str).encode('utf8')
+    json_object = json.dumps(dict, indent = 3, allow_nan = True, default = str).encode("utf-8")
     return json_object
 
 def PublishData(json_object):
     try:
         client.publish(Topic_Series_Filtred, json_object)
     except: # If the data is not in the correct format
-        client.publish(Topic_Series_Filtred, "Error", qos=1, retain=True)
+        client.publish(Topic_Series_Filtred, "Error".encode("utf-8"), qos=1, retain=True)
 #endregion
 
 #region Call the functions
@@ -452,7 +516,7 @@ def ProcessingAlgorihtm(message):
         ch1, ch2, ch3 = RearangeData(ecgObject)
         timeDifferent = TimeDiffer(ecgObject)
         if timeDifferent>1000:
-            client.publish(Topic_Series_Filtred, "TimeError", qos=1, retain=True)
+            client.publish(Topic_Series_Filtred, "TimeError".encode("utf-8"), qos=1, retain=True)
         else:
             Findings_ch1 = CalcParametres(ch1)
             Findings_ch2 = CalcParametres(ch2)
@@ -468,7 +532,7 @@ def ProcessingAlgorihtm(message):
             PublishData(json_object)
     except Exception as e:
         errorMsg  = "An error occured in the processing algorithm." + "\n" +str(e)
-        encoded = errorMsg.encode('utf8')
+        encoded = errorMsg.encode("utf-8")
         client.publish(Topic_Series_Filtred,encoded , qos=1, retain=True)
         print(
         "An error occured in the processing algorithm. \n"
@@ -477,9 +541,6 @@ def ProcessingAlgorihtm(message):
         
 
 #endregion
-
-
-
 
 """Running code"""
 #region Set up and run the MQTT client
@@ -504,14 +565,16 @@ try:
     client.connect(host=broker_address, port=1883, keepalive=120)
     
 except ConnectionRefusedError as e:
-        client.publish(Topic_Series_Filtred, "First attempt to connect fails because the docker container for the MQTT server needs to start." + "\n" +e, qos=1, retain=True)
+        msg = ("First attempt to connect fails because the docker container for the MQTT server needs to start." + "\n" +e).encode("utf-8")
+        client.publish(Topic_Series_Filtred, msg, qos=1, retain=True)
         
         print(
         "First attempt to connect fails because the docker container for the MQTT server needs to start."
         )
         print(e)
 except Exception as e:
-        client.publish(Topic_Series_Filtred, "An error occured in the processing algorithm." + "\n" +str(e) , qos=1, retain=True)
+        msg = ("First attempt to connect fails because the docker container for the MQTT server needs to start." + "\n" +e).encode("utf-8")
+        client.publish(Topic_Series_Filtred, msg , qos=1, retain=True)
         print(
         "An error occured in the processing algorithm. \n"
         )
