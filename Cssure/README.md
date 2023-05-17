@@ -54,14 +54,14 @@ To launch the Python Data Processing
 	2. If you have the Anaconda-navigator and want the exact same environment as the developer (the safe solution), follow the steps below:
 		2.1 Open the "Anaconda prompt" and navigate to the Python folder for the project, 
 			for example, "C:\Users\madsn\Documents\BME\TELE\repos\Project\Cssure\Python".
-		2.2 Run the command "conda env create --name CssureEnv -f environment.yml".
-		2.3 Run the command "conda activate CssureEnv".
+		2.2 Run the command "conda env create -f env.yml".
+		2.3 Run the command "conda activate Temo".
 		Go to step 4.
 
 		If an update in the environment should occur, complete the next few steps:
 			2.5 Open the "Anaconda prompt" and navigate to the Python folder for the project, 
 				for example, "C:\Users\madsn\Documents\BME\TELE\repos\Project\Cssure\Python".
-			2.6 Run the command "conda env update --name CssureEnv --file environment.yml --prune".
+			2.6 Run the command "conda env update --name Temo --file env.yml --prune".
 		
 	3. If you have the Anaconda-navigator and just want to add the must-required packaged (the unsafe solution), follow the steps below:
 		3.1 Open the wanted environment.
@@ -78,5 +78,13 @@ To launch the Python Data Processing
 	
 	Once you have completed these steps, you should be able to detect seizures with this project.
 		
-		
+
+Deploy in a docker container:
+	To deploy the script in a docker container the following steps is needed:
+		1. Install docker from https://www.docker.com/products/docker-desktop
+		2. Open a terminal and navigate to the folder where the Dockerfile is located
+		3. Build the docker image with the following command: docker build -t cssure .
+		4. Run the docker image with the following command: docker run -it cssure
+
+
 Enjoy receiving and processing raw data!
